@@ -1,0 +1,21 @@
+.group class is used for the hover state of the parent div to affect the child elements too
+Tailwindcss only supports the arbitrary values only when they can known at the build time
+before:content-[]==> only accepts the string values in the "" and ''
+Even the <ref> can be used while creating an image slider
+ref in full ==> reference
+scrollBy==> when called to a div scrolls its content
+onTouchStart : e: React.TouchEvent<HTMLDIVELEMENT>
+onTouchMove: move_interval by minus startX(of touchstart)
+touchEvents not necessary as there is a way to <overflow-x-auto> and hide the scrollabr width 
+
+
+
+ <PaginationLink onClick={() => handlePageChange(totalPageCount)} isActive={page === totalPageCount}>
+            {totalPageCount}
+          </PaginationLink>
+
+
+
+regex to define the validity of the phone number
+react_library: --> react-phone-input-2
+/^\d{10}$/
