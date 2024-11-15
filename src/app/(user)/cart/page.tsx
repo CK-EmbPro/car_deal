@@ -4,13 +4,9 @@ import { useRouter } from 'next/navigation'
 import React, { ChangeEvent, useState } from 'react'
 import LcdMonitor from "../../../../public/cart/lcd_monitor.png"
 import gamepad from "../../../../public/cart/gamepad.png"
+import { CartItem } from '@/types/cart'
+import { calculateItemsSubtotal } from '@/utils/calculateItemsSubTotal'
 
-interface CartItem {
-    image: StaticImageData,
-    cartItemName: string,
-    price: number,
-    itemQuantity: number,
-}
 
 
 const cartItems: CartItem[] = [
@@ -34,9 +30,7 @@ const Cart = () => {
 
     const router = useRouter()
     const [cartItemsState, setcartItemsState] = useState<CartItem[]>(cartItems)
-    const calculateItemsSubtotal = (cartItems: CartItem[]) => {
-        return cartItems.reduce((total, item) => total + (item.price * item.itemQuantity), 0)
-    }
+
 
     const handleQuantityChange = (event: ChangeEvent<HTMLInputElement>, index:number) => {
         const newQuantity = parseInt(event.target.value, 10)
