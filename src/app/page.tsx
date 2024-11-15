@@ -6,7 +6,7 @@ import { faAngleLeft, faAngleRight, faHeart as faHeartSolid } from '@fortawesome
 import { faHeart as faHeartRegular } from '@fortawesome/free-regular-svg-icons'
 import Link from 'next/link'
 import { PaginationWithLinks } from '@/components/ui/pagination-with-links'
-import { Car } from '@/lib/types'
+import { Car } from '@/types/car'
 import WhyChooseUs from '@/components/WhyChooseUs'
 
 
