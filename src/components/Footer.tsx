@@ -12,7 +12,7 @@ import Link from 'next/link'
 
 const Footer = () => {
     return (
-        <div className='bg-black text-white   '>
+        <div className='bg-black text-white  text-[1.1em] '>
             <div className=' flex justify-evenly py-[40px] pt-[80px] px-[30px]  '>
 
                 <div className='flex flex-col gap-4  w-[17%]'>
