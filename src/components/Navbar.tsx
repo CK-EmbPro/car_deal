@@ -5,7 +5,7 @@ import { faHeart } from '@fortawesome/free-regular-svg-icons'
 import Link from 'next/link'
 const Navbar = () => {
     return (
-        <div className=' flex justify-evenly items-center py-4'>
+        <div className=' flex justify-evenly items-center py-4 text-[1.1em]'>
             <Link href={"/"} className='text-[2em] font-bold text-red-500'>Car_Deal</Link>
             <div className='flex gap-12 '>
                 <Link href={"/"} className={` relative before:absolute before:top-5 before:left-0 before:content-[""] before:h-[2px] before:w-full before:bg-black before:scale-x-0 before:transition-transform before:duration-300  hover:before:scale-x-100  `}>Home</Link>
