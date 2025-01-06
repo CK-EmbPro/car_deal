@@ -97,7 +97,7 @@ const updateCar = async (req: MulterRequest, res: Response) => {
       );
       return res.status(400).json(new ApiResponse(validationErrors[0], null));
     }
-  }
+  } 
 };
 
 const getSingleCar = async (req: Request, res: Response) => {
@@ -151,7 +151,7 @@ const deleteCar = async (req: Request, res: Response) => {
     if (!deletedCar) throw new NotFoundError("Car not found");
 
     // Delete car Image at cloudinary
-    await deleteCloudinaryImage(deletedCar.imageCloudId);
+    await deleteCloudinaryImage(deletedCar.carImageCloudId);
 
     return res
       .status(200)
@@ -178,7 +178,7 @@ const deleteAllCars = async (req: Request, res: Response) => {
 
     //delete all car Imgs at cloudinaryy
     await Promise.all(
-      carsToDelete.map((car) => deleteCloudinaryImage(car.imageCloudId))
+      carsToDelete.map((car) => deleteCloudinaryImage(car.carImageCloudId))
     );
 
     // Now delete all cars

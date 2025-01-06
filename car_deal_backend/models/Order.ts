@@ -3,19 +3,29 @@ import { IOrder } from "../types";
 import { ORDER_STATUS } from "../constants/orderStatus";
 
 const orderSchema = new Schema<IOrder>({
-  name: {
+  carName: {
     type: String,
     required: [true, "car name required"],
   },
-  photo: {
+  carImageName: {
     type: String,
     required: [true, "car photo required"],
   },
-  quantity: {
+
+  carImageCloudId: {
+    type: String,
+    required: [true, "car photo required"],
+  },
+
+  carImageCloudUrl: {
+    type: String,
+    required: [true, "car photo required"],
+  },
+  carQuantity: {
     type: Number,
     required: [true, "Number of cars ordered required"],
   },
-  status: {
+  orderStatus: {
     type: String,
     enum: {
       values: [
@@ -30,4 +40,4 @@ const orderSchema = new Schema<IOrder>({
   },
 });
 
-export const CarModel = model<IOrder>("Contacts", orderSchema);
+export const OrderModel = model<IOrder>("Contacts", orderSchema);

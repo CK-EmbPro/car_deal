@@ -4,7 +4,7 @@ export interface ICar {
     category: string;
     description: string;
     isLiked: boolean
-    image: string;
-    imageCloudId:string;
-    imageCloudUrl: string
+    carImageName: string;
+    carImageCloudId:string;
+    carImageCloudUrl: string
 }

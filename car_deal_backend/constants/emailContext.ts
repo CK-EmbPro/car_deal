@@ -1,0 +1,4 @@
+export const EMAIL_CONTEXT = {
+    VERIFICATION_CODE: "VERIFICATION_CODE",
+    CONTACT: "CONTACT"
+} as const

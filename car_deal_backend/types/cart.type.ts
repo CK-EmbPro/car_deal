@@ -1,7 +1,9 @@
 export interface ICart {
-    name: string;
-    price: number;
-    photo: string;
-    userEmail: string;
-    userPhoneNumber: string
+  carName: string;
+  carPrice: number;
+  carImageName: string;
+  carImageCloudId: string;
+  carImageCloudUrl: string;
+  userEmail: string;
+  userPhoneNumber: string;
 }

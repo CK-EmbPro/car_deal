@@ -1,5 +1,5 @@
 import { model, Schema } from "mongoose";
-import { ICart, IContact } from "../types";
+import {  IContact } from "../types";
 
 const contactSchema = new Schema<IContact>({
     firstName: {type:String, required:[true, "first name required"]},
@@ -9,4 +9,4 @@ const contactSchema = new Schema<IContact>({
     phoneNumber: {type:String, required:[true, "first name required"]}
 })
 
-export const CarModel = model<IContact>('Contacts', contactSchema)
+export const ContactModel = model<IContact>('Contacts', contactSchema)

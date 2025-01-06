@@ -12,6 +12,7 @@ import { generateToken } from "../utils/jwt";
 import { IUser, MulterRequest } from "../types";
 import fs from "fs";
 import { uploadImage } from "../utils/uploadCloudinaryImage";
+import { EMAIL_CONTEXT } from "../constants/emailContext";
 
 // Temporary storage for verification codes
 let verificationCodes = new Map<string, { code: string; expiresAt: Date }>();
@@ -38,7 +39,12 @@ export const login = async (req: Request, res: Response) => {
     });
 
     // Send verificationCode to email
-    emailSender(email, verificationCode);
+    emailSender({
+      emailContext: EMAIL_CONTEXT.VERIFICATION_CODE, 
+      signInEmail: email,
+      verificationCode
+
+    });
   } catch (error) {
     if (error instanceof BadRequestError) {
       return res.status(400).json(new ApiResponse(error.message, null));
