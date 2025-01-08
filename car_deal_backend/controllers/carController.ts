@@ -7,7 +7,7 @@ import { CarModel } from "../models/Car";
 import mongoose from "mongoose";
 import { deleteCloudinaryImage } from "../utils/deleteCloudinaryImage";
 
-const addCar = async (req: MulterRequest, res: Response) => {
+export const addCar = async (req: MulterRequest, res: Response) => {
   try {
     const { name, price, category, description, isLiked } = req.body;
     const filePath = req.file?.path;
@@ -49,7 +49,7 @@ const addCar = async (req: MulterRequest, res: Response) => {
   }
 };
 
-const updateCar = async (req: MulterRequest, res: Response) => {
+export const updateCar = async (req: MulterRequest, res: Response) => {
   try {
     let updatedCarData = req.body;
     const { carId } = req.params;
@@ -100,7 +100,7 @@ const updateCar = async (req: MulterRequest, res: Response) => {
   } 
 };
 
-const getSingleCar = async (req: Request, res: Response) => {
+export const getSingleCar = async (req: Request, res: Response) => {
   try {
     const { carId } = req.params;
     const car = await CarModel.findById(carId);
@@ -122,7 +122,7 @@ const getSingleCar = async (req: Request, res: Response) => {
   }
 };
 
-const getAllCars = async (req: Request, res: Response) => {
+export const getAllCars = async (req: Request, res: Response) => {
   try {
     const cars = await CarModel.find();
     return res
@@ -141,7 +141,7 @@ const getAllCars = async (req: Request, res: Response) => {
   }
 };
 
-const deleteCar = async (req: Request, res: Response) => {
+export const deleteCar = async (req: Request, res: Response) => {
   try {
     const { carId } = req.params;
     // Delete car and return deleted car document
@@ -168,7 +168,7 @@ const deleteCar = async (req: Request, res: Response) => {
   }
 };
 
-const deleteAllCars = async (req: Request, res: Response) => {
+export const deleteAllCars = async (req: Request, res: Response) => {
   try {
     // Retrieve imageCloudIds of all cars
     const carsToDelete = await CarModel.find({}, "imageCloudId");

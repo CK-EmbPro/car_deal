@@ -2,8 +2,15 @@ import { Request, Response } from "express";
 import { OrderModel } from "../models/Order";
 import { NotFoundError } from "../exceptions/errors";
 import mongoose from "mongoose";
-const  stripe = require("stripe")(process.env.STRIPE_SECRET)
+import Stripe from "stripe"
+import dotenv from 'dotenv'
 
+dotenv.config()
+
+// Check if stripe secret is there
+if(!process.env.STRIPE_SECRET) throw new Error("No stripe secret provided")
+
+const  stripe = new Stripe(process.env.STRIPE_SECRET)
 
 export const createCheckoutSession = async(req: Request, res: Response)=>{
   const {products} = req.body
