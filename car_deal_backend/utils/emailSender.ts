@@ -1,7 +1,7 @@
 import nodemailer from "nodemailer";
 import dotenv from "dotenv";
 import { EMAIL_CONTEXT } from "../constants/emailContext";
-import { contactMessageEmailTemplate } from "../template/emailTemplate";
+import { contactMessageEmailTemplate, subscriptionMessageEmailTemplate } from "../template/emailTemplate";
 
 dotenv.config();
 
@@ -14,7 +14,8 @@ interface EmailSenderOptions{
   verificationCode?: string,
   contacterEmail?: string,
   contacterMessage?: string,
-  contacterNames?: string
+  contacterNames?: string,
+  subscriberEmail?: string,
 
 }
 export const emailSender = ({
@@ -24,6 +25,7 @@ export const emailSender = ({
   contacterEmail,
   contacterMessage,
   contacterNames,
+  subscriberEmail
 }: EmailSenderOptions
 
 ) => {
@@ -56,6 +58,16 @@ export const emailSender = ({
         contacterNames!,
         contacterEmail!,
         contacterMessage!
+      ),
+    };
+  }else if(emailContext === EMAIL_CONTEXT.SUBSCRIPTION){
+    const senderEmail =gmailAuthEmail
+    mailOptions = {
+      from: senderEmail,
+      to: subscriberEmail,
+      subject: "SUCCESSFULLY SUBSCRIBED TO CAR_DEAL",
+      html: subscriptionMessageEmailTemplate(
+        subscriberEmail!
       ),
     };
   }

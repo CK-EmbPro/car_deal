@@ -2,6 +2,38 @@ import { Request, Response } from "express";
 import { OrderModel } from "../models/Order";
 import { NotFoundError } from "../exceptions/errors";
 import mongoose from "mongoose";
+const  stripe = require("stripe")(process.env.STRIPE_SECRET)
+
+
+export const createCheckoutSession = async(req: Request, res: Response)=>{
+  const {products} = req.body
+
+  const lineItems = products.map((product:any)=>({
+    price_data:{
+      currency: "usd",
+      product_data:{
+        name: product.name,
+        images: [product.image]
+      },
+
+       unit_amount: Math.round(product.price*100)
+    },
+
+    quantity: product.quantity
+  }))
+
+  const session = await stripe.checkout.sessions.create({
+    payment_method_types: ["card"],
+    line_items: lineItems,
+    mode: "payment",
+    success_url: "",
+    cancel_url: ""
+  })
+
+  // how to determine that the payment went successful or failed
+
+  res.json({id:session.id})
+}
 
 export const placeOrder = async (req: Request, res: Response) => {
   try {
@@ -16,7 +48,30 @@ export const placeOrder = async (req: Request, res: Response) => {
       userEmail,
       userPhoneNumber,
     } = req.body;
-  } catch (error) {}
+
+    const toBePlaced = new OrderModel({
+      carName,
+      totalPrice,
+      carImageName,
+      carImageCloudId,
+      carImageCloudUrl,
+      carQuantity,
+      orderStatus,
+      userEmail,
+      userPhoneNumber
+    })
+
+    const placedOrder = await toBePlaced.save()
+
+    return res.status(201).json(new ApiResponse("Order placed successfully", placedOrder))
+  } catch (error) {
+    if(error instanceof Error){
+      return res.status(400).json(new ApiResponse(error.message, null))
+    }else if(error instanceof mongoose.Error.ValidationError){
+      const validationErrors = Object.values(error.errors).map(err => err.message)
+      return res.status(400).json(new ApiResponse(validationErrors[0], null))
+    }
+  }
 };
 
 export const updatedOrder = async (req: Request, res: Response) => {

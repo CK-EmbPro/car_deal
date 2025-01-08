@@ -20,13 +20,13 @@ export const contactMessageEmailTemplate = (
 export const subscriptionMessageEmailTemplate = (subscriberEmail: string): string => {
     return `
       <div style="font-family: Arial, sans-serif; line-height: 1.6; color: #333;">
-        <h2 style="color: #007BFF;">Welcome to G-Wissen Ltd!</h2>
+        <h2 style="color: #007BFF;">Welcome to Car_Deal Ltd!</h2>
         <p>Dear Subscriber,</p>
-        <p>Thank you for subscribing to G-Wissen Ltd's newsletter. We’re thrilled to have you on board.</p>
+        <p>Thank you for subscribing to Car_Deal Ltd's newsletter. We’re thrilled to have you on board.</p>
         <p>You’ll now receive regular updates, news, and exclusive content directly in your inbox at:</p>
         <p style="font-weight: bold;">${subscriberEmail}</p>
         <p>If you have any questions or wish to manage your subscription, feel free to contact us anytime.</p>
-        <p style="margin-top: 20px;">Warm regards,<br>The G-Wissen Ltd Team</p>
+        <p style="margin-top: 20px;">Warm regards,<br>The Car_Deal Ltd Team</p>
         <p style="color: #555; font-size: 0.9em;">This email was automatically generated. Please do not reply to this email.</p>
       </div>
     `;

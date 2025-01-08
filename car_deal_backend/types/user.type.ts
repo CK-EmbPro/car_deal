@@ -4,7 +4,7 @@ export interface IUser {
     email: string;
     phoneNumber: string;
     password: string;
-    profilePhoto: string;
+    profilePhotoName: string;
     profilePhotoCloudId: string;
     profilePhotoCloudUrl: string
 }

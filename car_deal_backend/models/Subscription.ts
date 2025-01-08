@@ -9,28 +9,22 @@ const subscriptionSchema = new Schema<ISubscription>({
     match: [/.+@.+\..+/, "Please enter a valid email address"],
   },
 
-  firstName: {
-    type: String,
-    required: [true, "First Name is required"],
-  },
-
-  lastName: {
-    type: String,
-    required: [true, "Last Name is required"],
-  },
-
-  password: {
-    type: String,
-    required: [true, "Password is required"],
-    min: [10, "Password must be at least 10 characters"],
-  },
-
   phoneNumber: {
     type: String,
     required: [true, "Phone Number is required"],
   },
 
-  profilePhoto: {
+  profilePhotoName: {
+    type: String,
+    required: [true, "Profile Photo is required"],
+  },
+
+  profilePhotoCloudId: {
+    type: String,
+    required: [true, "Profile Photo is required"],
+  },
+
+  profilePhotoCloudUrl: {
     type: String,
     required: [true, "Profile Photo is required"],
   },

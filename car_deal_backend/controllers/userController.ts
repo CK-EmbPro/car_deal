@@ -140,7 +140,7 @@ export const register = async (req: MulterRequest, res: Response) => {
       email,
       password,
       phoneNumber,
-      profilePhoto: fileNameWithExtension,
+      profilePhotoName: fileNameWithExtension,
       profilePhotoPublicId: imagePublicId,
       profilePhotoUrl: imageUrl,
     });
@@ -170,3 +170,4 @@ export const register = async (req: MulterRequest, res: Response) => {
     }
   }
 };
+

@@ -35,7 +35,7 @@ const userSchema = new Schema<IUserDocument>({
     required: [true, "Phone Number is required"],
   },
 
-  profilePhoto: {
+  profilePhotoName: {
     type: String,
     required: [true, "Profile photo is required"],
   },
