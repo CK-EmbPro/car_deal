@@ -4,6 +4,7 @@ import { NotFoundError } from "../exceptions/errors";
 import mongoose from "mongoose";
 import { emailSender } from "../utils/emailSender";
 import { EMAIL_CONTEXT } from "../constants/emailContext";
+import { ApiResponse } from "../apiResponse/ApiResponse";
 
 export const addContact = async (req: Request, res: Response) => {
   try {
@@ -21,22 +22,22 @@ export const addContact = async (req: Request, res: Response) => {
     const contacterNames = `${firstName} ${lastName}`;
 
     emailSender({
-        emailContext: EMAIL_CONTEXT.CONTACT,
-        contacterEmail: email,
-        contacterNames
-    })
-    
+      emailContext: EMAIL_CONTEXT.CONTACT,
+      contacterEmail: email,
+      contacterNames,
+    });
+
     return res
       .status(201)
       .json(new ApiResponse("Contacted successfully", savedContact));
   } catch (error) {
-    if (error instanceof Error) {
-      res.status(400).json(new ApiResponse(error.message, null));
-    } else if (error instanceof mongoose.Error.ValidationError) {
+    if (error instanceof mongoose.Error.ValidationError) {
       const validationErrors = Object.values(error.errors).map(
         (err) => err.message
       );
       return res.status(400).json(new ApiResponse(validationErrors[0], null));
+    } else if (error instanceof Error) {
+      res.status(500).json(new ApiResponse(error.message, null));
     }
   }
 };
@@ -61,13 +62,13 @@ export const updateContact = async (req: Request, res: Response) => {
   } catch (error) {
     if (error instanceof NotFoundError) {
       return res.status(404).json(new ApiResponse(error.message, null));
-    } else if (error instanceof Error) {
-      return res.status(400).json(new ApiResponse(error.message, null));
     } else if (error instanceof mongoose.Error.ValidationError) {
       const validationErrors = Object.values(error.errors).map(
         (err) => err.message
       );
       return res.status(400).json(new ApiResponse(validationErrors[0], null));
+    } else if (error instanceof Error) {
+      return res.status(500).json(new ApiResponse(error.message, null));
     }
   }
 };
@@ -84,13 +85,13 @@ export const getSingleContact = async (req: Request, res: Response) => {
   } catch (error) {
     if (error instanceof NotFoundError) {
       return res.status(404).json(new ApiResponse(error.message, null));
-    } else if (error instanceof Error) {
-      return res.status(400).json(new ApiResponse(error.message, null));
     } else if (error instanceof mongoose.Error.ValidationError) {
       const validationErrors = Object.values(error.errors).map(
         (err) => err.message
       );
       return res.status(400).json(new ApiResponse(validationErrors[0], null));
+    } else if (error instanceof Error) {
+      return res.status(500).json(new ApiResponse(error.message, null));
     }
   }
 };
@@ -102,13 +103,13 @@ export const getContacts = async (req: Request, res: Response) => {
       .status(200)
       .json(new ApiResponse("Contacts retrieved successfully", contacts));
   } catch (error) {
-    if (error instanceof Error) {
-      return res.status(400).json(new ApiResponse(error.message, null));
-    } else if (error instanceof mongoose.Error.ValidationError) {
+    if (error instanceof mongoose.Error.ValidationError) {
       const validationErrors = Object.values(error.errors).map(
         (err) => err.message
       );
       return res.status(400).json(new ApiResponse(validationErrors[0], null));
+    } else if (error instanceof Error) {
+      return res.status(400).json(new ApiResponse(error.message, null));
     }
   }
 };
@@ -126,13 +127,13 @@ export const deleteContact = async (req: Request, res: Response) => {
   } catch (error) {
     if (error instanceof NotFoundError) {
       return res.status(404).json(new ApiResponse(error.message, null));
-    } else if (error instanceof Error) {
-      return res.status(400).json(new ApiResponse(error.message, null));
     } else if (error instanceof mongoose.Error.ValidationError) {
       const validationErrors = Object.values(error.errors).map(
         (err) => err.message
       );
       return res.status(400).json(new ApiResponse(validationErrors[0], null));
+    } else if (error instanceof Error) {
+      return res.status(500).json(new ApiResponse(error.message, null));
     }
   }
 };
@@ -141,13 +142,14 @@ export const deleteContacts = async (req: Request, res: Response) => {
   try {
     await ContactModel.deleteMany();
   } catch (error) {
-    if (error instanceof Error) {
-      return res.status(400).json(new ApiResponse(error.message, null));
-    } else if (error instanceof mongoose.Error.ValidationError) {
+    if (error instanceof mongoose.Error.ValidationError) {
       const validationErrors = Object.values(error.errors).map(
         (err) => err.message
       );
       return res.status(400).json(new ApiResponse(validationErrors[0], null));
+    }
+    if (error instanceof Error) {
+      return res.status(500).json(new ApiResponse(error.message, null));
     }
   }
 };

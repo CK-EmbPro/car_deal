@@ -1,4 +1,4 @@
-class ApiResponse<T=any>{
+export class ApiResponse<T=any>{
     message: string;
     entity: T;
     token?:string;

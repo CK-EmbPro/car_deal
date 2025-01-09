@@ -1,5 +1,4 @@
 {
-  "type": "module",
   "name": "car_deal_backend",
   "version": "1.0.0",
   "description": "Backend module for car_deal project ",

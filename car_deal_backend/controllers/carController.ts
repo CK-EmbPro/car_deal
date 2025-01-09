@@ -6,6 +6,7 @@ import { uploadImage } from "../utils/uploadCloudinaryImage";
 import { CarModel } from "../models/Car";
 import mongoose from "mongoose";
 import { deleteCloudinaryImage } from "../utils/deleteCloudinaryImage";
+import { ApiResponse } from "../apiResponse/ApiResponse";
 
 export const addCar = async (req: MulterRequest, res: Response) => {
   try {
@@ -38,13 +39,13 @@ export const addCar = async (req: MulterRequest, res: Response) => {
   } catch (error) {
     if (error instanceof NotFoundError) {
       return res.status(404).json(new ApiResponse(error.message, null));
-    } else if (error instanceof Error) {
-      return res.status(400).json(new ApiResponse(error.message, null));
     } else if (error instanceof mongoose.Error.ValidationError) {
       const validationErrors = Object.values(error.errors).map(
         (err) => err.message
       );
       return res.status(400).json(new ApiResponse(validationErrors[0], null));
+    } else if (error instanceof Error) {
+      return res.status(500).json(new ApiResponse(error.message, null));
     }
   }
 };
@@ -89,15 +90,15 @@ export const updateCar = async (req: MulterRequest, res: Response) => {
   } catch (error) {
     if (error instanceof NotFoundError) {
       return res.status(404).json(new ApiResponse(error.message, null));
-    } else if (error instanceof Error) {
-      return res.status(400).json(new ApiResponse(error.message, null));
     } else if (error instanceof mongoose.Error.ValidationError) {
       const validationErrors = Object.values(error.errors).map(
         (err) => err.message
       );
       return res.status(400).json(new ApiResponse(validationErrors[0], null));
+    } else if (error instanceof Error) {
+      return res.status(500).json(new ApiResponse(error.message, null));
     }
-  } 
+  }
 };
 
 export const getSingleCar = async (req: Request, res: Response) => {
@@ -111,13 +112,13 @@ export const getSingleCar = async (req: Request, res: Response) => {
   } catch (error) {
     if (error instanceof NotFoundError) {
       return res.status(404).json(new ApiResponse(error.message, null));
-    } else if (error instanceof Error) {
-      return res.status(400).json(new ApiResponse(error.message, null));
     } else if (error instanceof mongoose.Error.ValidationError) {
       const validationErrors = Object.values(error.errors).map(
         (err) => err.message
       );
       return res.status(404).json(new ApiResponse(validationErrors[0], null));
+    } else if (error instanceof Error) {
+      return res.status(500).json(new ApiResponse(error.message, null));
     }
   }
 };
@@ -129,14 +130,14 @@ export const getAllCars = async (req: Request, res: Response) => {
       .status(200)
       .json(new ApiResponse("Cars retrieved successfully", cars));
   } catch (error) {
-    if (error instanceof Error) {
-      return res.status(400).json(new ApiResponse(error.message, null));
-    }
     if (error instanceof mongoose.Error.ValidationError) {
       const validationErrors = Object.values(error.errors).map(
         (err) => err.message
       );
       return res.status(400).json(new ApiResponse(validationErrors[0], null));
+    }
+    if (error instanceof Error) {
+      return res.status(500).json(new ApiResponse(error.message, null));
     }
   }
 };
@@ -164,6 +165,8 @@ export const deleteCar = async (req: Request, res: Response) => {
         (err) => err.message
       );
       return res.status(400).json(new ApiResponse(validationErrors[0], null));
+    } else if (error instanceof Error) {
+      return res.status(500).json(new ApiResponse(error.message, null));
     }
   }
 };
@@ -195,6 +198,8 @@ export const deleteAllCars = async (req: Request, res: Response) => {
         (err) => err.message
       );
       return res.status(400).json(new ApiResponse(validationErrors[0], null));
+    }else if (error instanceof Error) {
+      return res.status(500).json(new ApiResponse(error.message, null));
     }
   }
 };

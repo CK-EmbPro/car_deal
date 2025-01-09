@@ -2,45 +2,46 @@ import { Request, Response } from "express";
 import { OrderModel } from "../models/Order";
 import { NotFoundError } from "../exceptions/errors";
 import mongoose from "mongoose";
-import Stripe from "stripe"
-import dotenv from 'dotenv'
+import Stripe from "stripe";
+import dotenv from "dotenv";
+import { ApiResponse } from "../apiResponse/ApiResponse";
 
-dotenv.config()
+dotenv.config();
 
 // Check if stripe secret is there
-if(!process.env.STRIPE_SECRET) throw new Error("No stripe secret provided")
+if (!process.env.STRIPE_SECRET) throw new Error("No stripe secret provided");
 
-const  stripe = new Stripe(process.env.STRIPE_SECRET)
+const stripe = new Stripe(process.env.STRIPE_SECRET);
 
-export const createCheckoutSession = async(req: Request, res: Response)=>{
-  const {products} = req.body
+export const createCheckoutSession = async (req: Request, res: Response) => {
+  const { products } = req.body;
 
-  const lineItems = products.map((product:any)=>({
-    price_data:{
+  const lineItems = products.map((product: any) => ({
+    price_data: {
       currency: "usd",
-      product_data:{
+      product_data: {
         name: product.name,
-        images: [product.image]
+        images: [product.image],
       },
 
-       unit_amount: Math.round(product.price*100)
+      unit_amount: Math.round(product.price * 100),
     },
 
-    quantity: product.quantity
-  }))
+    quantity: product.quantity,
+  }));
 
   const session = await stripe.checkout.sessions.create({
     payment_method_types: ["card"],
     line_items: lineItems,
     mode: "payment",
     success_url: "",
-    cancel_url: ""
-  })
+    cancel_url: "",
+  });
 
   // how to determine that the payment went successful or failed
 
-  res.json({id:session.id})
-}
+  res.json({ id: session.id });
+};
 
 export const placeOrder = async (req: Request, res: Response) => {
   try {
@@ -65,18 +66,22 @@ export const placeOrder = async (req: Request, res: Response) => {
       carQuantity,
       orderStatus,
       userEmail,
-      userPhoneNumber
-    })
+      userPhoneNumber,
+    });
 
-    const placedOrder = await toBePlaced.save()
+    const placedOrder = await toBePlaced.save();
 
-    return res.status(201).json(new ApiResponse("Order placed successfully", placedOrder))
+    return res
+      .status(201)
+      .json(new ApiResponse("Order placed successfully", placedOrder));
   } catch (error) {
-    if(error instanceof Error){
-      return res.status(400).json(new ApiResponse(error.message, null))
-    }else if(error instanceof mongoose.Error.ValidationError){
-      const validationErrors = Object.values(error.errors).map(err => err.message)
-      return res.status(400).json(new ApiResponse(validationErrors[0], null))
+    if (error instanceof mongoose.Error.ValidationError) {
+      const validationErrors = Object.values(error.errors).map(
+        (err) => err.message
+      );
+      return res.status(400).json(new ApiResponse(validationErrors[0], null));
+    } else if (error instanceof Error) {
+      return res.status(500).json(new ApiResponse(error.message, null));
     }
   }
 };
@@ -99,13 +104,13 @@ export const updatedOrder = async (req: Request, res: Response) => {
   } catch (error) {
     if (error instanceof NotFoundError) {
       return res.status(404).json(new ApiResponse(error.message, null));
-    } else if (error instanceof Error) {
-      return res.status(400).json(new ApiResponse(error.message, null));
     } else if (error instanceof mongoose.Error.ValidationError) {
       const validationErrors = Object.values(error.errors).map(
         (err) => err.message
       );
       return res.status(400).json(new ApiResponse(validationErrors[0], null));
+    } else if (error instanceof Error) {
+      return res.status(500).json(new ApiResponse(error.message, null));
     }
   }
 };
@@ -123,13 +128,13 @@ export const getSingleOrder = async (req: Request, res: Response) => {
   } catch (error) {
     if (error instanceof NotFoundError) {
       return res.status(404).json(new ApiResponse(error.message, null));
-    } else if (error instanceof Error) {
-      return res.status(400).json(new ApiResponse(error.message, null));
     } else if (error instanceof mongoose.Error.ValidationError) {
       const validationErrors = Object.values(error.errors).map(
         (err) => err.message
       );
       return res.status(400).json(new ApiResponse(validationErrors[0], null));
+    } else if (error instanceof Error) {
+      return res.status(500).json(new ApiResponse(error.message, null));
     }
   }
 };
@@ -143,13 +148,13 @@ export const getOrders = async (req: Request, res: Response) => {
   } catch (error) {
     if (error instanceof NotFoundError) {
       return res.status(404).json(new ApiResponse(error.message, null));
-    } else if (error instanceof Error) {
-      return res.status(400).json(new ApiResponse(error.message, null));
     } else if (error instanceof mongoose.Error.ValidationError) {
       const validationErrors = Object.values(error.errors).map(
         (err) => err.message
       );
       return res.status(400).json(new ApiResponse(validationErrors[0], null));
+    } else if (error instanceof Error) {
+      return res.status(500).json(new ApiResponse(error.message, null));
     }
   }
 };
@@ -167,13 +172,13 @@ export const deleteOrder = async (req: Request, res: Response) => {
   } catch (error) {
     if (error instanceof NotFoundError) {
       return res.status(404).json(new ApiResponse(error.message, null));
-    } else if (error instanceof Error) {
-      return res.status(400).json(new ApiResponse(error.message, null));
     } else if (error instanceof mongoose.Error.ValidationError) {
       const validationErrors = Object.values(error.errors).map(
         (err) => err.message
       );
       return res.status(400).json(new ApiResponse(validationErrors[0], null));
+    } else if (error instanceof Error) {
+      return res.status(500).json(new ApiResponse(error.message, null));
     }
   }
 };
@@ -182,13 +187,13 @@ export const deleteOrders = async (req: Request, res: Response) => {
   try {
     await OrderModel.deleteMany();
   } catch (error) {
-    if (error instanceof Error) {
-      return res.status(400).json(new ApiResponse(error.message, null));
-    } else if (error instanceof mongoose.Error.ValidationError) {
+    if (error instanceof mongoose.Error.ValidationError) {
       const validationErrors = Object.values(error.errors).map(
         (err) => err.message
       );
       return res.status(400).json(new ApiResponse(validationErrors[0], null));
+    } else if (error instanceof Error) {
+      return res.status(400).json(new ApiResponse(error.message, null));
     }
   }
 };

@@ -74,7 +74,7 @@ export const emailSender = ({
 
   transporter.sendMail(mailOptions!, (err, result) => {
     if (err instanceof Error) {
-      return console.log("Error sending email");
+      throw new Error("Error sending email: "+err.message);
     }
 
     console.log("successfully email sent -> ", result);

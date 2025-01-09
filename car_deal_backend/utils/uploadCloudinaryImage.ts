@@ -35,7 +35,7 @@ export const uploadImage = async (filePath: string) => {
     const result = await cloudinary.uploader.upload(filePath, {
       folder: cloudFolder,
       use_filename: true,
-      //   unique_filename: true,
+      unique_filename: false,
     });
 
     fs.unlinkSync(filePath);
