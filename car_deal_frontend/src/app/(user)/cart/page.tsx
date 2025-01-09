@@ -6,7 +6,7 @@ import LcdMonitor from "../../../../public/cart/lcd_monitor.png"
 import gamepad from "../../../../public/cart/gamepad.png"
 import { CartItem } from '@/types/cart'
 import { calculateItemsSubtotal } from '@/utils/calculateItemsSubTotal'
-
+import { loadStripe } from '@stripe/stripe-js';
 
 
 const cartItems: CartItem[] = [
@@ -32,13 +32,43 @@ const Cart = () => {
     const [cartItemsState, setcartItemsState] = useState<CartItem[]>(cartItems)
 
 
-    const handleQuantityChange = (event: ChangeEvent<HTMLInputElement>, index:number) => {
+    const handleQuantityChange = (event: ChangeEvent<HTMLInputElement>, index: number) => {
         const newQuantity = parseInt(event.target.value, 10)
         const updatedItems = [...cartItems]
         updatedItems[index].itemQuantity = newQuantity
 
         setcartItemsState(updatedItems)
 
+    }
+
+    const makePayment = async () => {
+        const publishableKey = process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY
+        if(publishableKey){
+
+            const stripe = await loadStripe(publishableKey)
+            
+            const body = {
+                products: cartItemsState
+            }
+            
+            const headers = {
+                "Content-Type": "application/json"
+            }
+            
+            const response = await fetch("backend-url/orders/placeOrder", {
+                method: "POST", 
+                headers,
+                body: JSON.stringify(body)
+            })
+            
+            const session = await response.json()
+            
+            const result = stripe?.redirectToCheckout({
+                sessionId: session.id
+            })
+            
+            
+        }
     }
 
     return (
@@ -70,7 +100,7 @@ const Cart = () => {
                                     value={itemQuantity}
                                     type="number"
                                     min={1}
-                                    onChange={(event)=>handleQuantityChange(event, index)}
+                                    onChange={(event) => handleQuantityChange(event, index)}
                                 />
                             </div>
                             <p className=' w-[24%] flex items-center'>${itemQuantity * price}</p>
@@ -90,7 +120,7 @@ const Cart = () => {
                     <p className="border-b border-slate-500 flex justify-between">Subtotal: <span>${calculateItemsSubtotal(cartItems)}</span></p>
                     <p className="border-b border-slate-500 flex justify-between">Shipping: <span>Free</span></p>
                     <p className="flex justify-between">Total: <span>${calculateItemsSubtotal(cartItems)}</span></p>
-                    <button className='bg-red-500 rounded-[10px] w-[60%] p-1 py-2 text-white mx-auto '>Process to checkout</button>
+                    <button onClick={makePayment} className='bg-red-500 rounded-[10px] w-[60%] p-1 py-2 text-white mx-auto '>Process to checkout</button>
                 </div>
             </div>
         </div>
