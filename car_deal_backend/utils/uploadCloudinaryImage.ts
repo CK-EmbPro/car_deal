@@ -2,9 +2,8 @@ import fs from "fs";
 import cloudinary from "../config/cloudinaryConfig";
 import path from "path";
 
-export const uploadImage = async (filePath: string) => {
+export const uploadImage = async (cloudFolder:string,filePath: string) => {
   try {
-    const cloudFolder = "CAR_DEAL_USERS_PROFILE_PHOTOS";
     const fileNameWithExtension = path.basename(filePath);
     // now remove the file extension
     const onlyFileName = path

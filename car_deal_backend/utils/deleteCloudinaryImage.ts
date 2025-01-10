@@ -1,9 +1,10 @@
 import cloudinary from "../config/cloudinaryConfig"
-import { BadRequestError, NotFoundError } from "../exceptions/errors";
+import { NotFoundError } from "../exceptions/errors";
 
 // Use publicId to destroy / delete an image from cloudinary
 export const deleteCloudinaryImage =async (imagePublicId: string)=>{
     try {
+
         if(!imagePublicId){
             throw new NotFoundError("No image public id found")
         }

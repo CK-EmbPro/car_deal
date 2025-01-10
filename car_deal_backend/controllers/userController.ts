@@ -15,6 +15,7 @@ import { uploadImage } from "../utils/uploadCloudinaryImage";
 import { EMAIL_CONTEXT } from "../constants/emailContext";
 import { ApiResponse } from "../apiResponse/ApiResponse";
 import { deleteCloudinaryImage } from "../utils/deleteCloudinaryImage";
+import { CLOUD_FOLDERS } from "../constants/cloudFolderNames";
 
 // Temporary storage for verification codes
 let verificationCodes = new Map<string, { code: string; expiresAt: Date }>();
@@ -77,7 +78,8 @@ export const verifyCode = async (req: Request, res: Response) => {
     const { email, code } = req.body;
 
     //Check if the email exists
-    if (!(await UserModel.findOne({ email }))) throw new NotFoundError("Email provided not found");
+    if (!(await UserModel.findOne({ email })))
+      throw new NotFoundError("Email provided not found");
 
     const record = verificationCodes.get(email);
 
@@ -152,7 +154,7 @@ export const register = async (req: MulterRequest, res: Response) => {
 
     // Upload to cloudinary profilephoto
     const { fileNameWithExtension, imagePublicId, imageUrl } =
-      await uploadImage(filePath);
+      await uploadImage(CLOUD_FOLDERS.USERS_PROFILE_PHOTOS, filePath);
 
     const userToSave = new UserModel({
       firstName,
@@ -185,6 +187,73 @@ export const register = async (req: MulterRequest, res: Response) => {
         (err) => err?.message
       );
       return res.status(400).json(new ApiResponse(error.message, null));
+    } else if (error instanceof Error) {
+      return res.status(500).json(new ApiResponse(error.message, null));
+    }
+  }
+};
+
+export const getSingleUser = async (req: Request, res: Response) => {
+  try {
+    const { userId } = req.params;
+    const user = await UserModel.findById(userId);
+    return res
+      .status(200)
+      .json(new ApiResponse("User retrieved successfully", user));
+  } catch (error) {
+    if (error instanceof mongoose.Error.ValidationError) {
+      const validationErrors = Object.values(error.errors).map(
+        (err) => err?.message
+      );
+      return res.status(400).json(new ApiResponse(error.message, null));
+    } else if (error instanceof Error) {
+      return res.status(500).json(new ApiResponse(error.message, null));
+    }
+  }
+};
+
+export const getUsers = async (req: Request, res: Response) => {
+  try {
+    const users = await UserModel.find();
+    return res
+      .status(200)
+      .json(new ApiResponse("Users retrieved successfully", users));
+  } catch (error) {
+    if (error instanceof mongoose.Error.ValidationError) {
+      const validationErrors = Object.values(error.errors).map(
+        (err) => err?.message
+      );
+      return res.status(400).json(new ApiResponse(error.message, null));
+    } else if (error instanceof Error) {
+      return res.status(500).json(new ApiResponse(error.message, null));
+    }
+  }
+};
+
+export const deleteUser = async (req: Request, res: Response) => {
+  try {
+    const { userId } = req.params;
+
+    // Delete the user
+    const deletedUser = await UserModel.findByIdAndDelete(userId);
+
+    // Check if user is deleted
+    if (!deletedUser) throw new NotFoundError("User not found");
+
+    // Delete user profile photo at cloudinary
+    await deleteCloudinaryImage(deletedUser.profilePhotoCloudId);
+
+    return res
+      .status(200)
+      .json(new ApiResponse("User deleted successfully", null));
+  } catch (error) {
+    if (error instanceof NotFoundError) {
+      return res.status(404).json(new ApiResponse(error.message, null));
+    } else if (error instanceof mongoose.Error.ValidationError) {
+      const validationErrors = Object.values(error.errors).map(
+        (err) => err.message
+      );
+      return res.status(400).json(new ApiResponse(validationErrors[0], null));
     } else if (error instanceof Error) {
       return res.status(500).json(new ApiResponse(error.message, null));
     }

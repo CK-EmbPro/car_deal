@@ -7,18 +7,19 @@ import { CarModel } from "../models/Car";
 import mongoose from "mongoose";
 import { deleteCloudinaryImage } from "../utils/deleteCloudinaryImage";
 import { ApiResponse } from "../apiResponse/ApiResponse";
+import { CLOUD_FOLDERS } from "../constants/cloudFolderNames";
 
 export const addCar = async (req: MulterRequest, res: Response) => {
   try {
     const { name, price, category, description, isLiked } = req.body;
     const filePath = req.file?.path;
     // Check if file is provided
-    if (!filePath || fs.existsSync(filePath))
-      throw new NotFoundError("No File Uploaded");
+    if (!filePath || !fs.existsSync(filePath))
+      throw new NotFoundError("No file  Uploaded");
 
     //Upload the file to cloudinary
     const { fileNameWithExtension, imagePublicId, imageUrl } =
-      await uploadImage(filePath);
+      await uploadImage(CLOUD_FOLDERS.CARS_FOLDER, filePath);
 
     let savedCar = new CarModel({
       name,
@@ -26,16 +27,16 @@ export const addCar = async (req: MulterRequest, res: Response) => {
       category,
       description,
       isLiked,
-      image: fileNameWithExtension,
-      imageCloudId: imagePublicId,
-      imageCloudUrl: imageUrl,
+      carImageName: fileNameWithExtension,
+      carImageCloudId: imagePublicId,
+      carImageCloudUrl: imageUrl,
     });
 
     savedCar = await savedCar.save();
 
     return res
       .status(201)
-      .json(new ApiResponse<ICar>("Registered car successfully", savedCar));
+      .json(new ApiResponse<ICar>("Car registered successfully", savedCar));
   } catch (error) {
     if (error instanceof NotFoundError) {
       return res.status(404).json(new ApiResponse(error.message, null));
@@ -56,27 +57,37 @@ export const updateCar = async (req: MulterRequest, res: Response) => {
     const { carId } = req.params;
     const filePath = req.file?.path;
 
+    // Get the car to update
+    const carToUpdate = await CarModel.findById(carId);
+
     // Check if the car exists
-    if (!(await CarModel.findById(carId)))
-      throw new NotFoundError("Car not found");
+    if (!carToUpdate) throw new NotFoundError("Car not found");
 
     // If new file is provided update
     let fileName;
     let imageCloudUrl;
     let imageCloudId;
     if (filePath) {
-      let fileUploadResult = await uploadImage(filePath);
+      let fileUploadResult = await uploadImage(
+        CLOUD_FOLDERS.CARS_FOLDER,
+        filePath
+      );
       fileName = fileUploadResult.fileNameWithExtension;
       imageCloudId = fileUploadResult.imagePublicId;
       imageCloudUrl = fileUploadResult.imageUrl;
     }
 
+    if (carToUpdate.carImageCloudId != imageCloudId) {
+     
+      await deleteCloudinaryImage(carToUpdate.carImageCloudId);
+    }
+
     // Add car_image info to updating data
     updatedCarData = {
       ...updatedCarData,
-      image: fileName,
-      imageCloudId,
-      imageCloudUrl,
+      carImageName: fileName,
+      carImageCloudId: imageCloudId,
+      carImageCloudUrl: imageCloudUrl,
     };
 
     // Update the car data
@@ -174,7 +185,7 @@ export const deleteCar = async (req: Request, res: Response) => {
 export const deleteAllCars = async (req: Request, res: Response) => {
   try {
     // Retrieve imageCloudIds of all cars
-    const carsToDelete = await CarModel.find({}, "imageCloudId");
+    const carsToDelete = await CarModel.find({}, "carImageCloudId");
 
     // Check if carImgCloudIds is empty
     if (carsToDelete.length === 0) throw new NotFoundError("No cars to delete");
@@ -198,7 +209,7 @@ export const deleteAllCars = async (req: Request, res: Response) => {
         (err) => err.message
       );
       return res.status(400).json(new ApiResponse(validationErrors[0], null));
-    }else if (error instanceof Error) {
+    } else if (error instanceof Error) {
       return res.status(500).json(new ApiResponse(error.message, null));
     }
   }

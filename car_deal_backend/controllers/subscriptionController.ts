@@ -49,10 +49,10 @@ export const addSubscription = async (req: Request, res: Response) => {
 export const updateSubscription = async (req: Request, res: Response) => {
   try {
     const updatedSubscriptionData = req.body;
-    const { susbscriptionId } = req.params;
+    const { subscriptionId } = req.params;
 
     const updatedSubscription = await SubscriptionModel.findByIdAndUpdate(
-      susbscriptionId,
+      subscriptionId,
       updatedSubscriptionData,
       { new: true }
     );
@@ -114,7 +114,7 @@ export const getSubscriptions = async (req: Request, res: Response) => {
       .status(200)
       .json(
         new ApiResponse(
-          "All Subscriptions retrieved successfully",
+          "   Subscriptions retrieved successfully",
           subscriptions
         )
       );
@@ -136,7 +136,7 @@ export const deleteSingleSubscription = async (req: Request, res: Response) => {
     const deletedSubscription = await SubscriptionModel.findByIdAndDelete(
       subscriptionId
     );
-    if (deletedSubscription) throw new NotFoundError("Subscripton not found");
+    if (!deletedSubscription) throw new NotFoundError("Subscripton not found");
 
     return res
       .status(200)
@@ -158,6 +158,8 @@ export const deleteSingleSubscription = async (req: Request, res: Response) => {
 export const deleteSubscriptions = async (req: Request, res: Response) => {
   try {
     await SubscriptionModel.deleteMany();
+    return res.status(200).json(new ApiResponse("Subscriptions deleted successfully", null))
+
   } catch (error) {
      if (error instanceof mongoose.Error.ValidationError) {
       const validationErrors = Object.values(error.errors).map(

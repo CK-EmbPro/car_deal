@@ -48,6 +48,8 @@ export const emailSender = ({
       subject: "Your Verification Code",
       text: `Your verification code is ${verificationCode}`,
     };
+
+    
   } else if (emailContext === EMAIL_CONTEXT.CONTACT) {
     const receiverEmail = gmailAuthEmail;
     mailOptions = {

@@ -8,7 +8,8 @@ export const addCartItem = async (req: Request, res: Response) => {
   try {
     const {
       carName,
-      carPrice,
+      unitPrice,
+      quantity,
       carImageName,
       carImageCloudId,
       carImageCloudUrl,
@@ -18,7 +19,8 @@ export const addCartItem = async (req: Request, res: Response) => {
 
     let savedCart = new CartModel({
       carName,
-      carPrice,
+      unitPrice,
+      quantity,
       carImageName,
       carImageCloudId,
       carImageCloudUrl,
@@ -141,6 +143,9 @@ export const deleteCartItem = async (req: Request, res: Response) => {
 export const deleteAllCartItems = async (req: Request, res: Response) => {
   try {
     await CartModel.deleteMany();
+    return res
+      .status(200)
+      .json(new ApiResponse("Carts deleted successfully", null));
   } catch (error) {
     if (error instanceof mongoose.Error.ValidationError) {
       const validationErrors = Object.values(error.errors).map(

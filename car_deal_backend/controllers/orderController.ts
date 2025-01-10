@@ -186,6 +186,8 @@ export const deleteOrder = async (req: Request, res: Response) => {
 export const deleteOrders = async (req: Request, res: Response) => {
   try {
     await OrderModel.deleteMany();
+    return res.status(200).json(new ApiResponse("Orders deleted successfully", null))
+
   } catch (error) {
     if (error instanceof mongoose.Error.ValidationError) {
       const validationErrors = Object.values(error.errors).map(

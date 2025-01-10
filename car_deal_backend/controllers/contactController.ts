@@ -25,6 +25,7 @@ export const addContact = async (req: Request, res: Response) => {
       emailContext: EMAIL_CONTEXT.CONTACT,
       contacterEmail: email,
       contacterNames,
+      contacterMessage: message
     });
 
     return res
@@ -141,6 +142,8 @@ export const deleteContact = async (req: Request, res: Response) => {
 export const deleteContacts = async (req: Request, res: Response) => {
   try {
     await ContactModel.deleteMany();
+    return res.status(200).json(new ApiResponse("Contacts deleted successfully", null))
+
   } catch (error) {
     if (error instanceof mongoose.Error.ValidationError) {
       const validationErrors = Object.values(error.errors).map(

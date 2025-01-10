@@ -6,7 +6,8 @@ const cartSchema = new Schema<ICart>({
   carImageName: { type: String, required: [true, "car imageName required"] },
   carImageCloudId: { type: String, required: [true, "car image cloudId required"] },
   carImageCloudUrl: { type: String, required: [true, "car image cloudUrl required"] },
-  carPrice: { type: Number, required: [true, "car price required"] },
+  unitPrice: { type: Number, required: [true, "car price required"] },
+  quantity: { type: Number, required: [true, "Quantity of cars required"] },
   userEmail: {
     type: String,
     required: true,

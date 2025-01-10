@@ -1,6 +1,7 @@
 export interface ICart {
   carName: string;
-  carPrice: number;
+  unitPrice: number;
+  quantity: number;
   carImageName: string;
   carImageCloudId: string;
   carImageCloudUrl: string;

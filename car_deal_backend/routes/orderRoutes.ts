@@ -14,7 +14,7 @@ orderRouter.get('/order/:orderId', getSingleOrder)
 
 
 // @ts-ignore
-orderRouter.get('/order/:orderId', getOrders)
+orderRouter.get('/order', getOrders)
 
 // @ts-ignore
 orderRouter.delete('/order/:orderId', deleteOrder)
