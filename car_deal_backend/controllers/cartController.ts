@@ -40,7 +40,7 @@ export const addCartItem = async (req: Request, res: Response) => {
       );
       return res.status(400).json(new ApiResponse(validationErrors[0], null));
     } else if (error instanceof Error) {
-      return res.status(500).json(new ApiResponse(error.message, null));
+      return res.status(400).json(new ApiResponse(error.message, null));
     }
   }
 };
@@ -69,7 +69,7 @@ export const updateCartItem = async (req: Request, res: Response) => {
       );
       return res.status(400).json(new ApiResponse(validationErrors[0], null));
     } else if (error instanceof Error) {
-      return res.status(500).json(new ApiResponse(error.message, null));
+      return res.status(400).json(new ApiResponse(error.message, null));
     }
   }
 };
@@ -93,7 +93,7 @@ export const getCartItem = async (req: Request, res: Response) => {
       );
       return res.status(400).json(new ApiResponse(validationErrors[0], null));
     } else if (error instanceof Error) {
-      return res.status(500).json(new ApiResponse(error.message, null));
+      return res.status(400).json(new ApiResponse(error.message, null));
     }
   }
 };
@@ -112,7 +112,7 @@ export const getCartItemList = async (req: Request, res: Response) => {
       return res.status(400).json(new ApiResponse(validationErrors[0], null));
     }
     if (error instanceof Error) {
-      return res.status(500).json(new ApiResponse(error.message, null));
+      return res.status(400).json(new ApiResponse(error.message, null));
     }
   }
 };
@@ -135,7 +135,7 @@ export const deleteCartItem = async (req: Request, res: Response) => {
       );
       return res.status(400).json(new ApiResponse(validationErrors[0], null));
     } else if (error instanceof Error) {
-      return res.status(500).json(new ApiResponse(error.message, null));
+      return res.status(400).json(new ApiResponse(error.message, null));
     }
   }
 };
@@ -154,7 +154,7 @@ export const deleteAllCartItems = async (req: Request, res: Response) => {
       return res.status(400).json(new ApiResponse(validationErrors[0], null));
     }
     if (error instanceof Error) {
-      return res.status(500).json(new ApiResponse(error.message, null));
+      return res.status(400).json(new ApiResponse(error.message, null));
     }
   }
 };

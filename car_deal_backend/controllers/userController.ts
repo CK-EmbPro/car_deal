@@ -68,7 +68,7 @@ export const login = async (req: Request, res: Response) => {
 
       return res.status(400).json(new ApiResponse(validationErrors[0], null));
     } else if (error instanceof Error) {
-      return res.status(500).json(new ApiResponse(error.message, null));
+      return res.status(400).json(new ApiResponse(error.message, null));
     }
   }
 };
@@ -122,7 +122,7 @@ export const verifyCode = async (req: Request, res: Response) => {
       );
       return res.status(400).json(new ApiResponse(validationErrors[0], null));
     } else if (error instanceof Error) {
-      return res.status(500).json(new ApiResponse(error.message, null));
+      return res.status(400).json(new ApiResponse(error.message, null));
     }
   }
 };
@@ -188,7 +188,7 @@ export const register = async (req: MulterRequest, res: Response) => {
       );
       return res.status(400).json(new ApiResponse(error.message, null));
     } else if (error instanceof Error) {
-      return res.status(500).json(new ApiResponse(error.message, null));
+      return res.status(400).json(new ApiResponse(error.message, null));
     }
   }
 };
@@ -207,7 +207,7 @@ export const getSingleUser = async (req: Request, res: Response) => {
       );
       return res.status(400).json(new ApiResponse(error.message, null));
     } else if (error instanceof Error) {
-      return res.status(500).json(new ApiResponse(error.message, null));
+      return res.status(400).json(new ApiResponse(error.message, null));
     }
   }
 };
@@ -225,7 +225,7 @@ export const getUsers = async (req: Request, res: Response) => {
       );
       return res.status(400).json(new ApiResponse(error.message, null));
     } else if (error instanceof Error) {
-      return res.status(500).json(new ApiResponse(error.message, null));
+      return res.status(400).json(new ApiResponse(error.message, null));
     }
   }
 };
@@ -255,7 +255,7 @@ export const deleteUser = async (req: Request, res: Response) => {
       );
       return res.status(400).json(new ApiResponse(validationErrors[0], null));
     } else if (error instanceof Error) {
-      return res.status(500).json(new ApiResponse(error.message, null));
+      return res.status(400).json(new ApiResponse(error.message, null));
     }
   }
 };
@@ -291,7 +291,7 @@ export const deleteAllUsers = async (req: Request, res: Response) => {
       );
       return res.status(400).json(new ApiResponse(validationErrors[0], null));
     } else if (error instanceof Error) {
-      return res.status(500).json(new ApiResponse(error.message, null));
+      return res.status(400).json(new ApiResponse(error.message, null));
     }
   }
 };

@@ -38,7 +38,7 @@ export const addContact = async (req: Request, res: Response) => {
       );
       return res.status(400).json(new ApiResponse(validationErrors[0], null));
     } else if (error instanceof Error) {
-      res.status(500).json(new ApiResponse(error.message, null));
+      res.status(400).json(new ApiResponse(error.message, null));
     }
   }
 };
@@ -69,7 +69,7 @@ export const updateContact = async (req: Request, res: Response) => {
       );
       return res.status(400).json(new ApiResponse(validationErrors[0], null));
     } else if (error instanceof Error) {
-      return res.status(500).json(new ApiResponse(error.message, null));
+      return res.status(400).json(new ApiResponse(error.message, null));
     }
   }
 };
@@ -92,7 +92,7 @@ export const getSingleContact = async (req: Request, res: Response) => {
       );
       return res.status(400).json(new ApiResponse(validationErrors[0], null));
     } else if (error instanceof Error) {
-      return res.status(500).json(new ApiResponse(error.message, null));
+      return res.status(400).json(new ApiResponse(error.message, null));
     }
   }
 };
@@ -134,7 +134,7 @@ export const deleteContact = async (req: Request, res: Response) => {
       );
       return res.status(400).json(new ApiResponse(validationErrors[0], null));
     } else if (error instanceof Error) {
-      return res.status(500).json(new ApiResponse(error.message, null));
+      return res.status(400).json(new ApiResponse(error.message, null));
     }
   }
 };
@@ -152,7 +152,7 @@ export const deleteContacts = async (req: Request, res: Response) => {
       return res.status(400).json(new ApiResponse(validationErrors[0], null));
     }
     if (error instanceof Error) {
-      return res.status(500).json(new ApiResponse(error.message, null));
+      return res.status(400).json(new ApiResponse(error.message, null));
     }
   }
 };

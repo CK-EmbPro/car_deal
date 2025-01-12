@@ -1,87 +1,166 @@
 import { Request, Response } from "express";
 import { OrderModel } from "../models/Order";
-import { NotFoundError } from "../exceptions/errors";
+import { BadRequestError, NotFoundError } from "../exceptions/errors";
 import mongoose from "mongoose";
 import Stripe from "stripe";
 import dotenv from "dotenv";
 import { ApiResponse } from "../apiResponse/ApiResponse";
+import { IOrder } from "../types";
+import { ORDER_STATUS } from "../constants/orderStatus";
+import { join } from "path";
 
 dotenv.config();
 
 // Check if stripe secret is there
 if (!process.env.STRIPE_SECRET) throw new Error("No stripe secret provided");
 
-const stripe = new Stripe(process.env.STRIPE_SECRET);
+const stripeInstance = new Stripe(process.env.STRIPE_SECRET);
+const FRONTEND_URL = process.env.FRONTEND_URL
 
 export const createCheckoutSession = async (req: Request, res: Response) => {
-  const { products } = req.body;
+  try {
+    const products: IOrder[] = req.body;
 
-  const lineItems = products.map((product: any) => ({
-    price_data: {
-      currency: "usd",
-      product_data: {
-        name: product.name,
-        images: [product.image],
+    if (!products) throw new BadRequestError("No products to order");
+
+    // Create line items for stripe checkout
+    const lineItems = products.map((product) => ({
+      price_data: {
+        currency: "usd",
+        product_data: {
+          name: product.carName,
+          images: [product.carImageCloudUrl],
+        },
+        unit_amount: Math.round(product.totalPrice * 100),
       },
 
-      unit_amount: Math.round(product.price * 100),
-    },
+      quantity: product.carQuantity,
+    }));
 
-    quantity: product.quantity,
-  }));
-
-  const session = await stripe.checkout.sessions.create({
-    payment_method_types: ["card"],
-    line_items: lineItems,
-    mode: "payment",
-    success_url: "",
-    cancel_url: "",
-  });
-
-  // how to determine that the payment went successful or failed
-
-  res.json({ id: session.id });
-};
-
-export const placeOrder = async (req: Request, res: Response) => {
-  try {
-    const {
-      carName,
-      totalPrice,
-      carImageName,
-      carImageCloudId,
-      carImageCloudUrl,
-      carQuantity,
-      orderStatus,
-      userEmail,
-      userPhoneNumber,
-    } = req.body;
-
-    const toBePlaced = new OrderModel({
-      carName,
-      totalPrice,
-      carImageName,
-      carImageCloudId,
-      carImageCloudUrl,
-      carQuantity,
-      orderStatus,
-      userEmail,
-      userPhoneNumber,
+    // Create stripe checkout session
+    const session = await stripeInstance.checkout.sessions.create({
+      payment_method_types: ["card"],
+      line_items: lineItems,
+      mode: "payment",
+      success_url: `${FRONTEND_URL}/success_url`,
+      cancel_url: `${FRONTEND_URL}/cancel_url`,
+      metadata: {
+        orderDetails: JSON.stringify(products),
+      },
     });
-
-    const placedOrder = await toBePlaced.save();
 
     return res
       .status(201)
-      .json(new ApiResponse("Order placed successfully", placedOrder));
-  } catch (error) {
-    if (error instanceof mongoose.Error.ValidationError) {
-      const validationErrors = Object.values(error.errors).map(
-        (err) => err.message
+      .json(
+        new ApiResponse("Checkout session created successfully", {
+          sessionId: session.id,
+        })
       );
-      return res.status(400).json(new ApiResponse(validationErrors[0], null));
+  } catch (error) {
+    if (error instanceof BadRequestError) {
+      return res.status(400).json(new ApiResponse(error.message, null));
     } else if (error instanceof Error) {
-      return res.status(500).json(new ApiResponse(error.message, null));
+      return res.status(400).json(new ApiResponse(error.message, null));
+    }
+  }
+};
+
+// Handler for payment webhook and placing orders
+export const makePaymentAndOrder = async (req: Request, res: Response) => {
+  try {
+    const stripeSignature = req.headers['stripe-signature'];
+    const stripeWebhookSecret = process.env.STRIPE_WEBHOOK_SECRET
+
+    // Check if stripeSignature is there 
+    if(!stripeSignature) throw new NotFoundError("Stripe signature is required")
+
+    // Check if the stripe webhook secret is there
+    if(!stripeWebhookSecret) throw new NotFoundError("Stripe webhook secret not provided");
+
+    // Create payment event from the webhook
+    const event = stripeInstance.webhooks.constructEvent(
+      req.body,
+      stripeSignature,
+      stripeWebhookSecret
+    )
+
+    if(event.type === "checkout.session.completed"){
+      const session = event.data.object as Stripe.Checkout.Session
+      const orderDetails:IOrder[] = JSON.parse(session.metadata?.orderDetails || '[]')
+
+      // Create APPROVED orders
+      await Promise.all(
+        orderDetails.map(async({
+          carName,
+          totalPrice,
+          carImageName,
+          carImageCloudId,
+          carImageCloudUrl,
+          carQuantity,
+          userEmail,
+          userPhoneNumber,
+        })=>{
+          const order = new OrderModel({
+            carName,
+            totalPrice,
+            carImageName,
+            carImageCloudId,
+            carImageCloudUrl,
+            carQuantity,
+            orderStatus: ORDER_STATUS.APPROVED,
+            userEmail,
+            userPhoneNumber,
+          })
+
+          await order.save()
+
+          return res.status(201).json(new ApiResponse("Payment made successfully", null))
+
+        })
+      )
+    }else if(event.type === "checkout.session.expired"){
+      const session = event.data.object as Stripe.Checkout.Session
+      const orderDetails:IOrder[] = JSON.parse(session.metadata?.orderDetails || '[]')
+
+      await Promise.all(
+        orderDetails.map(async({
+          carName,
+          totalPrice,
+          carImageName,
+          carImageCloudId,
+          carImageCloudUrl,
+          carQuantity,
+          userEmail,
+          userPhoneNumber})=>{
+            const order = new OrderModel({
+              carName,
+              totalPrice,
+              carImageName,
+              carImageCloudId,
+              carImageCloudUrl,
+              carQuantity,
+              orderStatus: ORDER_STATUS.REJECTED,
+              userEmail,
+              userPhoneNumber
+            })
+
+            await order.save()
+
+            return res.status(201).json(new ApiResponse("Payment failed", null))
+
+        })
+      )
+    }
+
+    
+  } catch (error) { 
+    if(error instanceof NotFoundError){
+      return res.status(404).json(new ApiResponse(error.message,null))
+    }else if(error instanceof mongoose.Error.ValidationError){
+      const validationErrors = Object.values(error.errors).map(err => err.message)
+      return res.status(400).json(new ApiResponse(validationErrors[0], null))
+    }else if (error instanceof Error){
+      return res.status(400).json(new ApiResponse(error.message,null))
     }
   }
 };
@@ -110,7 +189,7 @@ export const updatedOrder = async (req: Request, res: Response) => {
       );
       return res.status(400).json(new ApiResponse(validationErrors[0], null));
     } else if (error instanceof Error) {
-      return res.status(500).json(new ApiResponse(error.message, null));
+      return res.status(400).json(new ApiResponse(error.message, null));
     }
   }
 };
@@ -134,7 +213,7 @@ export const getSingleOrder = async (req: Request, res: Response) => {
       );
       return res.status(400).json(new ApiResponse(validationErrors[0], null));
     } else if (error instanceof Error) {
-      return res.status(500).json(new ApiResponse(error.message, null));
+      return res.status(400).json(new ApiResponse(error.message, null));
     }
   }
 };
@@ -154,7 +233,7 @@ export const getOrders = async (req: Request, res: Response) => {
       );
       return res.status(400).json(new ApiResponse(validationErrors[0], null));
     } else if (error instanceof Error) {
-      return res.status(500).json(new ApiResponse(error.message, null));
+      return res.status(400).json(new ApiResponse(error.message, null));
     }
   }
 };
@@ -178,7 +257,7 @@ export const deleteOrder = async (req: Request, res: Response) => {
       );
       return res.status(400).json(new ApiResponse(validationErrors[0], null));
     } else if (error instanceof Error) {
-      return res.status(500).json(new ApiResponse(error.message, null));
+      return res.status(400).json(new ApiResponse(error.message, null));
     }
   }
 };
@@ -186,8 +265,9 @@ export const deleteOrder = async (req: Request, res: Response) => {
 export const deleteOrders = async (req: Request, res: Response) => {
   try {
     await OrderModel.deleteMany();
-    return res.status(200).json(new ApiResponse("Orders deleted successfully", null))
-
+    return res
+      .status(200)
+      .json(new ApiResponse("Orders deleted successfully", null));
   } catch (error) {
     if (error instanceof mongoose.Error.ValidationError) {
       const validationErrors = Object.values(error.errors).map(
