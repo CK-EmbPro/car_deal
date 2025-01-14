@@ -1,11 +1,12 @@
 import type { Metadata } from "next";
-import "./globals.css";
+import "../styles/globals.css";
 import { Open_Sans } from "next/font/google"
 import '@fortawesome/fontawesome-svg-core/styles.css'
 import { config } from "@fortawesome/fontawesome-svg-core";
-import "@/lib/fontawesome"
+import "@/utils/fontawesome"
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
+import ReactQueryProvider from "@/providers/query-client/ReactQueryProvider";
 
 config.autoAddCss = false
 
@@ -31,9 +32,11 @@ export default function RootLayout({
       <body
         className={`${open_sans.className} antialiased`}
       >
-        <Navbar />
-        {children}
-        <Footer />
+        <ReactQueryProvider>
+          <Navbar />
+          {children}
+          <Footer />
+        </ReactQueryProvider>
       </body>
     </html>
   );
