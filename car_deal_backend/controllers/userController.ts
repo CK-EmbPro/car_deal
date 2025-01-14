@@ -16,6 +16,7 @@ import { EMAIL_CONTEXT } from "../constants/emailContext";
 import { ApiResponse } from "../apiResponse/ApiResponse";
 import { deleteCloudinaryImage } from "../utils/deleteCloudinaryImage";
 import { CLOUD_FOLDERS } from "../constants/cloudFolderNames";
+import { ADMIN_EMAIL } from "../constants/envVariables";
 
 // Temporary storage for verification codes
 let verificationCodes = new Map<string, { code: string; expiresAt: Date }>();
@@ -139,7 +140,7 @@ export const register = async (req: MulterRequest, res: Response) => {
 
     const userExists = await UserModel.findOne({ email });
     // Check if user claims to be admin
-    if (userExists?.email === "kennydebrice2@gmail.com") {
+    if (userExists?.email === ADMIN_EMAIL!) {
       return res
         .status(409)
         .json(new ApiResponse<IUser>("Admin already exists", userExists));
