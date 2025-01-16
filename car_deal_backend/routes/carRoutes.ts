@@ -1,6 +1,6 @@
 import { Router } from "express";
 import { authRouter } from "./authRoutes";
-import { addCar, deleteAllCars, deleteCar, getAllCars, getSingleCar, updateCar } from "../controllers/carController";
+import { addCar, deleteAllCars, deleteCar, getAllCars, getSingleCar, updateCar, updatedCarIsLiked } from "../controllers/carController";
 import { upload } from "../config/multerConfig";
 import { adminMiddleware } from "../middlewares/adminMiddleware";
 
@@ -37,6 +37,8 @@ carRouter.post('/car', upload.single('file'), addCar)
 // @ts-ignore
 carRouter.put('/car/:carId', upload.single('file'), updateCar)
 
+// @ts-ignore
+carRouter.put('/car/:carId/like', updatedCarIsLiked)
 
 // @ts-ignore
 carRouter.get('/car/:carId', getSingleCar)

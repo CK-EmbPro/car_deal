@@ -1,4 +1,4 @@
-import { Request, Response } from "express";
+import { Request, response, Response } from "express";
 import { ICar, MulterRequest } from "../types";
 import fs from "fs";
 import { NotFoundError } from "../exceptions/errors";
@@ -111,6 +111,30 @@ export const updateCar = async (req: MulterRequest, res: Response) => {
     }
   }
 };
+
+export const updatedCarIsLiked = async(req: MulterRequest, res: Response) => {
+  try {
+    const {carId} = req.params
+    const {isLiked} = req.body
+
+    // Only update isLiked field
+    const updatedCar = await CarModel.findByIdAndUpdate(carId, {$set: {isLiked}}, {new : true})
+
+    // Check if the car exists
+    if(!updatedCar) throw new NotFoundError('Car not found')
+
+    return res.status(200).json(new ApiResponse("Car is liked", null))
+  } catch (error) {
+    if(error instanceof NotFoundError){
+      return res.status(404).json(new ApiResponse(error.message, null))
+    }else if(error instanceof mongoose.Error.ValidationError){
+      const validationErrors = Object.values(error.errors).map(err => err.message)
+      return res.status(400).json(new ApiResponse(validationErrors[0], null))
+    }else if(error instanceof Error){
+      return res.status(400).json(new ApiResponse(error.message, null))
+    }
+  }
+}
 
 export const getSingleCar = async (req: Request, res: Response) => {
   try {

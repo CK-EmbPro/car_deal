@@ -1,6 +1,5 @@
 import { Router } from "express";
-import { addContact, deleteContact, deleteContacts, getContacts, getSingleContact, updateContact } from "../controllers/contactController";
-import { adminMiddleware } from "../middlewares/adminMiddleware";
+import { addContact, deleteContact, deleteContacts, getContacts, getSingleContact } from "../controllers/contactController";
 
 export const contactRouter = Router()
 
@@ -34,8 +33,8 @@ export const contactRouter = Router()
 contactRouter.post('/contact', addContact)
 
 
-// @ts-ignore
-contactRouter.put('/contact/:contactId', updateContact)
+// // @ts-ignore
+// contactRouter.put('/contact/:contactId', updateContact)
 
 
 // @ts-ignore

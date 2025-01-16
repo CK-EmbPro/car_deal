@@ -9,6 +9,7 @@ import { ApiResponse } from "../apiResponse/ApiResponse";
 export const addContact = async (req: Request, res: Response) => {
   try {
     const { firstName, lastName, email, phoneNumber, message } = req.body;
+    console.log('contact data ', req.body);
     let savedContact = new ContactModel({
       firstName,
       lastName,
@@ -43,36 +44,36 @@ export const addContact = async (req: Request, res: Response) => {
   }
 };
 
-export const updateContact = async (req: Request, res: Response) => {
-  try {
-    const { contactId } = req.params;
-    const updatedContactData = req.body;
-    const updatedContact = await ContactModel.findByIdAndUpdate(
-      contactId,
-      updatedContactData,
-      { new: true }
-    );
+// export const updateContact = async (req: Request, res: Response) => {
+//   try {
+//     const { contactId } = req.params;
+//     const updatedContactData = req.body;
+//     const updatedContact = await ContactModel.findByIdAndUpdate(
+//       contactId,
+//       updatedContactData,
+//       { new: true }
+//     );
 
-    if (!updatedContact) {
-      throw new NotFoundError("Contact not found");
-    }
+//     if (!updatedContact) {
+//       throw new NotFoundError("Contact not found");
+//     }
 
-    return res
-      .status(200)
-      .json(new ApiResponse("Contact updated successfully", updatedContact));
-  } catch (error) {
-    if (error instanceof NotFoundError) {
-      return res.status(404).json(new ApiResponse(error.message, null));
-    } else if (error instanceof mongoose.Error.ValidationError) {
-      const validationErrors = Object.values(error.errors).map(
-        (err) => err.message
-      );
-      return res.status(400).json(new ApiResponse(validationErrors[0], null));
-    } else if (error instanceof Error) {
-      return res.status(400).json(new ApiResponse(error.message, null));
-    }
-  }
-};
+//     return res
+//       .status(200)
+//       .json(new ApiResponse("Contact updated successfully", updatedContact));
+//   } catch (error) {
+//     if (error instanceof NotFoundError) {
+//       return res.status(404).json(new ApiResponse(error.message, null));
+//     } else if (error instanceof mongoose.Error.ValidationError) {
+//       const validationErrors = Object.values(error.errors).map(
+//         (err) => err.message
+//       );
+//       return res.status(400).json(new ApiResponse(validationErrors[0], null));
+//     } else if (error instanceof Error) {
+//       return res.status(400).json(new ApiResponse(error.message, null));
+//     }
+//   }
+// };
 
 export const getSingleContact = async (req: Request, res: Response) => {
   try {

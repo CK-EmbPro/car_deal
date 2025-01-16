@@ -10,6 +10,6 @@ const carSchema = new Schema<ICar>({
     carImageName: {type: String, required: [true, "Image name required"]},
     carImageCloudId: {type: String, required: [true, "Image cloud id required"]},
     carImageCloudUrl: {type: String, required: [true, "Image url required"]},
-})
+}, {timestamps: true})
 
 export const CarModel = model<ICar>('Cars', carSchema)

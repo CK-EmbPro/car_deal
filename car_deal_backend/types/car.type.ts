@@ -6,5 +6,5 @@ export interface ICar {
     isLiked: boolean
     carImageName: string;
     carImageCloudId:string;
-    carImageCloudUrl: string
+    carImageCloudUrl: string;
 }
