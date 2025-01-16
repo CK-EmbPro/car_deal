@@ -17,30 +17,39 @@ import { ApiResponse } from "../apiResponse/ApiResponse";
 import { deleteCloudinaryImage } from "../utils/deleteCloudinaryImage";
 import { CLOUD_FOLDERS } from "../constants/cloudFolderNames";
 import { ADMIN_EMAIL } from "../constants/envVariables";
+import { VerificationCodeModel } from "../models/VerificationCode";
+import { VERIFICATION_CODE_STATUS } from "../constants/verifyCodeStatus";
 
-// Temporary storage for verification codes
-let verificationCodes = new Map<string, { code: string; expiresAt: Date }>();
+
 
 export const login = async (req: Request, res: Response) => {
   try {
     const { email, password } = req.body;
     const userToLogin = await UserModel.findOne({ email });
 
+    // generate verfication code
+    const verificationCode = crypto.randomInt(100000, 999999).toString();
+    const expiresAt = new Date(Date.now() + 1 * 60 * 1000); //30 seconds expiry
+
+
     if (!userToLogin) {
       throw new NotFoundError("User not found");
     } else if (!(await userToLogin.comparePassword(password))) {
       throw new BadRequestError("Invalid password");
     }
+    // Delete all verification codes related to the email 
+    await VerificationCodeModel.deleteMany({ email })
 
-    // Generate verification code
-    const verificationCode = crypto.randomInt(100000, 999999).toString();
-    const expiresAt = new Date(Date.now() + 1 * 60 * 1000); //30 seconds expiry
-
-    // Temporary store verificationCode
-    verificationCodes.set(email, {
+    // Generate verificationCode 
+    const codeToVerify = new VerificationCodeModel({
+      email,
       code: verificationCode,
-      expiresAt: expiresAt,
-    });
+      expiresAt,
+      codeStatus: VERIFICATION_CODE_STATUS.AVAILABLE
+    })
+
+    // Store the verification code
+    await codeToVerify.save()
 
     // Send verificationCode to email
     emailSender({
@@ -78,15 +87,22 @@ export const verifyCode = async (req: Request, res: Response) => {
   try {
     const { email, code } = req.body;
 
+    // Check if email and code is provided
+    if (!email) {
+      throw new BadRequestError("No email provided")
+    } else if (!code) {
+      throw new BadRequestError("No code to verify")
+    }
+
     //Check if the email exists
     if (!(await UserModel.findOne({ email })))
       throw new NotFoundError("Email provided not found");
 
-    const record = verificationCodes.get(email);
+    const record = await VerificationCodeModel.findOne({ email });
 
     // Check if the code is reused
     if (!record) {
-      throw new UnauthorizedError("Code is already used");
+      throw new UnauthorizedError("Code doesn't exist");
     }
     // Check if code is not altered
     if (record.code !== code) {
@@ -95,11 +111,11 @@ export const verifyCode = async (req: Request, res: Response) => {
 
     // Check if the expiry date of code has reached
     if (record.expiresAt < new Date()) {
-      verificationCodes.delete(email);
+      await VerificationCodeModel.findOneAndUpdate({ email }, { $set: { codeStatus: VERIFICATION_CODE_STATUS.USED } }, { new: true })
       throw new UnauthorizedError("code expired");
     }
 
-    verificationCodes.delete(email);
+    await VerificationCodeModel.findOneAndDelete({ email });
 
     // Get the user
     const userToLogin = await UserModel.findOne({ email });
@@ -111,7 +127,7 @@ export const verifyCode = async (req: Request, res: Response) => {
     // Api Response
     return res
       .status(200)
-      .json(new ApiResponse<IUser>("Welcome back", userToLogin, token));
+      .json(new ApiResponse<IUser>("Welcome back ", userToLogin, token));
   } catch (error) {
     if (error instanceof NotFoundError) {
       return res.status(404).json(new ApiResponse(error.message, null));
@@ -127,6 +143,42 @@ export const verifyCode = async (req: Request, res: Response) => {
     }
   }
 };
+
+export const resendEmailVerification = async (req: Request, res: Response) => {
+  try {
+    const { email } = req.body
+
+    // generate verfication code
+    const verificationCode = crypto.randomInt(100000, 999999).toString();
+    const expiresAt = new Date(Date.now() + 1 * 60 * 1000); //30 seconds expiry
+
+    // Delete all codes related to that email
+    await VerificationCodeModel.deleteMany({ email })
+
+    // Create a new verification code
+    const codeToVerify = new VerificationCodeModel({
+      code: verificationCode,
+      codeStatus: VERIFICATION_CODE_STATUS.AVAILABLE,
+      email,
+      expiresAt
+    })
+
+    await codeToVerify.save()
+
+    // Send the code to the email
+    emailSender({
+      emailContext: EMAIL_CONTEXT.VERIFICATION_CODE,
+      signInEmail: email,
+      verificationCode,
+    });
+
+    return res.status(201).json(new ApiResponse("Please check your email for verification code", null))
+
+  } catch (error) {
+
+  }
+}
+
 
 export const register = async (req: MulterRequest, res: Response) => {
   try {

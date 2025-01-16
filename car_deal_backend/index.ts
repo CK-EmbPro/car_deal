@@ -8,6 +8,7 @@ import { orderRouter } from './routes/orderRoutes'
 import { cartRouter } from './routes/cartRoutes'
 import { carRouter } from './routes/carRoutes'
 import { subscriptionRouter } from './routes/subscriptionRoutes'
+import { authMiddleware } from './middlewares/authMiddleware'
 
 // Load environment variables
 dotenv.config()
@@ -37,6 +38,7 @@ app.get('/',(req: Request, res: Response)=>{
 app.use('/api/auth', authRouter)
 app.use('/api', contactRouter)
 app.use('/api', orderRouter)
+//@ts-ignore
 app.use('/api', cartRouter)
 app.use('/api', carRouter)
 app.use('/api', subscriptionRouter)
