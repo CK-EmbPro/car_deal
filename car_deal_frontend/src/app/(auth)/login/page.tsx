@@ -1,13 +1,11 @@
 "use client"
-import React, { ChangeEvent, FormEvent, SetStateAction, useState } from 'react'
+import React, { ChangeEvent, FormEvent, useState } from 'react'
 import SignUpBanner from "../../../../public/signup/signup_login_banner.svg"
-import Google from "../../../public/signup/Icon-Google.svg"
-import Link from 'next/link'
-import PhoneInput, { CountryData } from "react-phone-input-2"
 import "react-phone-input-2/lib/style.css"
-import { useMutation, useQuery } from '@tanstack/react-query'
+import { useMutation } from '@tanstack/react-query'
 import { loginApi } from '@/api/auth/authApi'
 import { LoginData } from '@/types/user'
+import { useRouter } from 'next/navigation'
 
 
 const Login = () => {
@@ -17,17 +15,27 @@ const Login = () => {
         password: ""
     })
 
-    const { mutate, isPending, isSuccess, isError, error, data } = useMutation({
+    const router = useRouter()
+
+    const { mutate } = useMutation({
         mutationFn: async () => await loginApi(loginData), // Define your API call here
         onSuccess: (data)=>{
             alert(`${data.message}`)
+
+            console.log('login data ', data);
+            // Redirect to codeVerificaiton after successfull login
+            router.replace(`/verify-code?email=${encodeURIComponent(loginData.email)}`)
+
             setloginData({
                 email: "",
                 password: ""
             })
+
+
         },
 
         onError: (error)=>{
+            console.log('error ', error);
             alert(`${error.message}`)
         }
     });

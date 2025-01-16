@@ -1,4 +1,3 @@
-import Image from 'next/image'
 import React from 'react'
 import AboutSvg from "../../../../public/about-us/our_story.svg"
 import SallersActive from "../../../../public/about-us/sellers_active.svg"

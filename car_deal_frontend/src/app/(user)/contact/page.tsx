@@ -1,6 +1,5 @@
 import React from 'react'
 import PhoneSvg from "../../../../public/contact/icons-phone.svg"
-import EmailSvg from "../../../../public/contact/icons-mail.svg"
 
 const Contact = () => {
     return (

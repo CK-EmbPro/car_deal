@@ -2,7 +2,7 @@
 import { useRouter } from 'next/navigation'
 import React from 'react'
 
-const not_found = () => {
+const NotFoundErrorPage = () => {
     const router = useRouter()
     return (
         <div className='w-[80%] mb-[10em] mx-auto flex flex-col gap-[40px]'>
@@ -20,4 +20,4 @@ const not_found = () => {
     )
 }
 
-export default not_found
+export default NotFoundErrorPage

@@ -1,6 +1,5 @@
 "use client"
-import Image, { StaticImageData } from 'next/image'
-import { useRouter } from 'next/navigation'
+import Image from 'next/image'
 import React, { ChangeEvent, useState } from 'react'
 import LcdMonitor from "../../../../public/cart/lcd_monitor.png"
 import gamepad from "../../../../public/cart/gamepad.png"
@@ -28,7 +27,6 @@ const cartItems: CartItem[] = [
 
 const Cart = () => {
 
-    const router = useRouter()
     const [cartItemsState, setcartItemsState] = useState<CartItem[]>(cartItems)
 
 

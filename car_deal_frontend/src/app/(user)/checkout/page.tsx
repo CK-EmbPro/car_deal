@@ -35,7 +35,7 @@ const CheckOut = () => {
             <div className=' w-[50%] mx-auto flex flex-col gap-[20px] '>
                 <div className='flex flex-col gap-7'>
                     {cartItems.map(({ cartItemName, image, itemQuantity, price }, index) => (
-                        <div className='flex justify-between items-center'>
+                        <div key={index} className='flex justify-between items-center'>
                             <div className='flex items-center justify-between w-[40%]'>
                                 <Image className='w-[30%] h-[70%]' src={image} alt='no_img' width={120} height={120} />
                                 <p>{cartItemName}</p>

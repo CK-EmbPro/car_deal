@@ -1,6 +1,5 @@
 import { Dispatch, SetStateAction } from "react";
 import { CountryCode, parsePhoneNumberFromString } from 'libphonenumber-js';
-import PhoneInput, { CountryData } from "react-phone-input-2";
 
 // Update the checkValidPhoneNumber to expect countryCode as a string
 export const checkValidPhoneNumber = (value: string, countryCode: CountryCode, setIsInvalid: Dispatch<SetStateAction<boolean>>): boolean => {

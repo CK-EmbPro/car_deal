@@ -43,14 +43,29 @@ export const registerUserApi = async (registerFormData: FormData) => {
 
 export const verifyCodeApi = async (email: string, code: string) => {
   try {
-    const response = await apiClient.post("/auth/verify-code");
+    const response = await apiClient.post("/auth/verify-code", {
+      email,
+      code: Number(code)
+    });
     return response.data;
   } catch (error) {
     if (error instanceof AxiosError) {
-      console.log("AxiosError " + error);
-      throw new Error(error.message);
+      throw new Error(error.response?.data.message);
     }
 
     throw error;
   }
 };
+
+export const resendVerificationCodeApi = async(email: string)=>{
+  try {
+    const response = await apiClient.post('/auth/resend-email', {email})
+    return response.data
+  } catch (error) {
+    if(error  instanceof AxiosError){
+      throw new Error(error.response?.data.message)
+    }
+
+    throw error
+  }
+}

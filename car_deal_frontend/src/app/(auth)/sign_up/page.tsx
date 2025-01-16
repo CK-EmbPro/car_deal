@@ -2,14 +2,13 @@
 import React, {
   ChangeEvent,
   FormEvent,
-  HTMLInputTypeAttribute,
   useRef,
   useState,
 } from "react";
 import SignUpBanner from "../../../../public/signup/signup_login_banner.svg";
 import Google from "../../../../public/signup/Icon-Google.svg";
 import Link from "next/link";
-import PhoneInput, { CountryData } from "react-phone-input-2";
+import PhoneInput from "react-phone-input-2";
 import "react-phone-input-2/lib/style.css";
 import { useMutation } from "@tanstack/react-query";
 import { registerUserApi } from "@/api/auth/authApi";
@@ -23,6 +22,7 @@ const SignUp = () => {
     mutationFn: async (userData: FormData) => await registerUserApi(userData),
     onSuccess: (data) => {
       alert(data.message);
+      console.log('signup data ', data);
       setRegisteringData({
         email: "",
         firstName: "",
@@ -144,7 +144,7 @@ const SignUp = () => {
           />
 
           {/* Profile photo */}
-          <div className="border border-black flex flex-col gap-2">
+          <div className=" flex flex-col gap-2">
             <label htmlFor="profile_photo">Profile photo</label>
             <input
               ref={fileInputRef}
