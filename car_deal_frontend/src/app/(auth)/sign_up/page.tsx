@@ -11,7 +11,7 @@ import Link from "next/link";
 import PhoneInput from "react-phone-input-2";
 import "react-phone-input-2/lib/style.css";
 import { useMutation } from "@tanstack/react-query";
-import { registerUserApi } from "@/api/auth/authApi";
+import { registerUserApi } from "@/api/auth/authApis";
 
 const SignUp = () => {
   const [phoneNumber, setPhoneNumber] = useState<string>("");
@@ -48,7 +48,7 @@ const SignUp = () => {
   });
 
   const handlePhoneNumChange = (value: string) => {
-    setPhoneNumber(value);
+    setPhoneNumber(`${value}`);
   };
 
   const handleRegisterDataChange = (e: ChangeEvent<HTMLInputElement>) => {

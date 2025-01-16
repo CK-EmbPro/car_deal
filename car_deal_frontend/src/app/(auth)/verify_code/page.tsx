@@ -1,6 +1,6 @@
 "use client";
 
-import { resendVerificationCodeApi, verifyCodeApi } from "@/api/auth/authApi";
+import { resendVerificationCodeApi, verifyCodeApi } from "@/api/auth/authApis";
 import { useMutation } from "@tanstack/react-query";
 import { useSearchParams, useRouter } from "next/navigation";
 import React, { ChangeEvent, FormEvent, Suspense, useState } from "react";

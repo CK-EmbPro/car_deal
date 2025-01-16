@@ -3,7 +3,7 @@ import React, { ChangeEvent, FormEvent, useState } from 'react'
 import SignUpBanner from "../../../../public/signup/signup_login_banner.svg"
 import "react-phone-input-2/lib/style.css"
 import { useMutation } from '@tanstack/react-query'
-import { loginApi } from '@/api/auth/authApi'
+import { loginApi } from '@/api/auth/authApis'
 import { LoginData } from '@/types/user'
 import { useRouter } from 'next/navigation'
 

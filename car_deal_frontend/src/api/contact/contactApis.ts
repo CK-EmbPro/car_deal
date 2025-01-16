@@ -15,7 +15,7 @@ export const addContactApi = async(contactData: IContact)=>{
         return response.data
     } catch (error) {
         if(error instanceof AxiosError){
-            throw new Error(error.response?.data.message)
+            throw new Error(error.response?.data.message || "An error occurred")
         }
 
         throw error
@@ -29,7 +29,7 @@ export const getContactsApi = async()=>{
         return response.data
     } catch (error) {
         if(error instanceof AxiosError){
-            throw new Error(error.response?.data.message)
+            throw new Error(error.response?.data.message || "An error occurred")
         }
         throw error
         
@@ -43,7 +43,7 @@ export const deleteSingleContactApi = async(id: string)=>{
         return response.data
     } catch (error) {
         if(error instanceof AxiosError){
-            throw new Error(error.response?.data.message)
+            throw new Error(error.response?.data.message || "An error occurred")
         }
         throw error
     }
@@ -55,7 +55,7 @@ export const deleteContactsApi = async()=>{
         return response.data
     } catch (error) {
         if(error instanceof AxiosError){
-            throw new Error(error.response?.data.message)
+            throw new Error(error.response?.data.message || "An error occurred")
         }
         throw error
     }
