@@ -6,5 +6,5 @@ export interface IUser {
     password: string;
     profilePhotoName: string;
     profilePhotoCloudId: string;
-    profilePhotoCloudUrl: string
+    profilePhotoCloudUrl: string;
 }

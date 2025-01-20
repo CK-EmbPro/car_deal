@@ -35,7 +35,7 @@ const verificationCodeSchema = new Schema<IVerificationCode>({
   }
   
   
-});
+}, {timestamps: true});
 
 
 export const VerificationCodeModel = model<IVerificationCode>("verificationCodes", verificationCodeSchema);

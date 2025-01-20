@@ -78,6 +78,6 @@ export const emailSender = ({
     if (err instanceof Error) {
       throw new Error(err.message);
     }
-    console.log("successfully email sent -> ");
+    console.log("successfully email sent");
   });
 };

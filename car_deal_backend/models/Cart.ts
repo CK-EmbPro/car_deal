@@ -11,10 +11,23 @@ const cartSchema = new Schema<ICart>({
   userEmail: {
     type: String,
     required: true,
-    unique: true,
+    unique: false,
+    index: false,
     match: [/.+@.+\..+/, "Please enter a valid email address"],
   },
   userPhoneNumber: { type: String, required: [true, ""] },
-});
+}, {timestamps: true});
 
-export const CartModel = model<ICart>("Carts", cartSchema);
+
+// cartSchema.index({ userEmail: 1, carName: 1, carImageCloudId: 1 }, { unique: false });
+
+// // Before creating the model, try to drop any existing unique indexes
+// try {
+//   if (model('carts')) {
+//     model('carts').collection.dropIndexes();
+//   }
+// } catch (error) {
+//   // Model doesn't exist yet, which is fine
+// }
+
+export const CartModel = model<ICart>("carts", cartSchema);

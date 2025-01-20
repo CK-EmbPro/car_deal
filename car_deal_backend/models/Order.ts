@@ -38,6 +38,6 @@ const orderSchema = new Schema<IOrder>({
     },
     default: ORDER_STATUS.PENDING,
   },
-});
+}, {timestamps: true});
 
 export const OrderModel = model<IOrder>("Orders", orderSchema);

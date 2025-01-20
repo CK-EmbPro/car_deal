@@ -117,13 +117,18 @@ export const updatedCarIsLiked = async(req: MulterRequest, res: Response) => {
     const {carId} = req.params
     const {isLiked} = req.body
 
+
     // Only update isLiked field
     const updatedCar = await CarModel.findByIdAndUpdate(carId, {$set: {isLiked}}, {new : true})
 
     // Check if the car exists
     if(!updatedCar) throw new NotFoundError('Car not found')
+    if(updatedCar.isLiked){
+      return res.status(200).json(new ApiResponse("Car is liked", updatedCar))
+    }else{
+      return res.status(200).json(new ApiResponse("Car is unliked", updatedCar))
+    }
 
-    return res.status(200).json(new ApiResponse("Car is liked", null))
   } catch (error) {
     if(error instanceof NotFoundError){
       return res.status(404).json(new ApiResponse(error.message, null))

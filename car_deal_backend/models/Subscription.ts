@@ -28,7 +28,7 @@ const subscriptionSchema = new Schema<ISubscription>({
     type: String,
     required: [true, "Profile Photo is required"],
   },
-});
+}, {timestamps: true});
 
 export const SubscriptionModel = model<ISubscription>(
   "SubscriptionModel",

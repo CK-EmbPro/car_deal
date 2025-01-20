@@ -49,7 +49,7 @@ const userSchema = new Schema<IUserDocument>({
     type: String,
     required: [true, "Profile photo url is required"],
   },
-});
+}, {timestamps: true});
 
 userSchema.pre('save', async function(next){
   if(!this.isModified('password')) return next();
