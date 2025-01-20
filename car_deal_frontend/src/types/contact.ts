@@ -5,3 +5,9 @@ export interface IContact {
     phoneNumber: string;
     message: string;
 }
+
+export interface ISavedContact extends IContact {
+    _id: string;
+    createdAt: string;
+    updatedAt: string;
+}

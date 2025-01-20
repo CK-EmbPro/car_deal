@@ -1,5 +1,5 @@
 import { BACKEND_URL } from "@/constants/variables";
-import { LoginData } from "@/types/user";
+import { ILoginData } from "@/types/user";
 import axios, { AxiosError } from "axios";
 
 const apiClient = axios.create({
@@ -9,7 +9,7 @@ const apiClient = axios.create({
   },
 });
 
-export const loginApi = async (loginData: LoginData) => {
+export const loginApi = async (loginData: ILoginData) => {
   try {
     const response = await apiClient.post("/auth/login", loginData);
     return response.data;

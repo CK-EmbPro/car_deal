@@ -12,17 +12,19 @@ import PhoneInput from "react-phone-input-2";
 import "react-phone-input-2/lib/style.css";
 import { useMutation } from "@tanstack/react-query";
 import { registerUserApi } from "@/api/auth/authApis";
+import { useAuth } from "@/context/userContext";
 
 const SignUp = () => {
   const [phoneNumber, setPhoneNumber] = useState<string>("");
   const [profilePhoto, setProfilePhoto] = useState<File | null>(null);
   const fileInputRef = useRef<HTMLInputElement | null>(null);
+  const {login} = useAuth()
 
   const { mutate } = useMutation({
     mutationFn: async (userData: FormData) => await registerUserApi(userData),
     onSuccess: (data) => {
       alert(data.message);
-      console.log('signup data ', data);
+      login(data.token, data.entity)
       setRegisteringData({
         email: "",
         firstName: "",

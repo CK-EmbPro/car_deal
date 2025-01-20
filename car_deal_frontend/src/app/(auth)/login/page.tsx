@@ -4,13 +4,13 @@ import SignUpBanner from "../../../../public/signup/signup_login_banner.svg"
 import "react-phone-input-2/lib/style.css"
 import { useMutation } from '@tanstack/react-query'
 import { loginApi } from '@/api/auth/authApis'
-import { LoginData } from '@/types/user'
+import { ILoginData } from '@/types/user'
 import { useRouter } from 'next/navigation'
 
 
 const Login = () => {
 
-    const [loginData, setloginData] = useState<LoginData>({
+    const [loginData, setloginData] = useState<ILoginData>({
         email: "",
         password: ""
     })
@@ -24,7 +24,7 @@ const Login = () => {
 
             console.log('login data ', data);
             // Redirect to codeVerificaiton after successfull login
-            router.replace(`/verify-code?email=${encodeURIComponent(loginData.email)}`)
+            router.replace(`/verify_code?email=${encodeURIComponent(loginData.email)}`)
 
             setloginData({
                 email: "",

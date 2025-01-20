@@ -1,6 +1,8 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-
+    images:{
+      domains: ['res.cloudinary.com']
+    },
     webpack(config) {
       // Add the rule for handling SVG files with @svgr/webpack
       config.module.rules.push({
