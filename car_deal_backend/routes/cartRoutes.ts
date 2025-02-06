@@ -1,6 +1,6 @@
 import { Router } from "express";
 import { addCar, updateCar } from "../controllers/carController";
-import { addCartItem, deleteAllCartItems, deleteCartItem, getCartItem, getCartItemList, updateCartItem } from "../controllers/cartController";
+import { addCartItem, deleteAllCartItems, deleteCartItem, getCartItem, getCartItemList, updateWholeCart } from "../controllers/cartController";
 
 export const cartRouter = Router()
 
@@ -8,7 +8,7 @@ export const cartRouter = Router()
 cartRouter.post('/cart', addCartItem)
 
 // @ts-ignore
-cartRouter.put('/cart/:cartId', updateCartItem)
+cartRouter.put('/cart', updateWholeCart)
 
 // @ts-ignore
 cartRouter.get('/cart/:cartId', getCartItem)
