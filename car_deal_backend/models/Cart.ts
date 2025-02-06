@@ -19,15 +19,5 @@ const cartSchema = new Schema<ICart>({
 }, {timestamps: true});
 
 
-// cartSchema.index({ userEmail: 1, carName: 1, carImageCloudId: 1 }, { unique: false });
-
-// // Before creating the model, try to drop any existing unique indexes
-// try {
-//   if (model('carts')) {
-//     model('carts').collection.dropIndexes();
-//   }
-// } catch (error) {
-//   // Model doesn't exist yet, which is fine
-// }
 
 export const CartModel = model<ICart>("carts", cartSchema);
