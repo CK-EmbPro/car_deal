@@ -102,7 +102,7 @@ export const verifyCode = async (req: Request, res: Response) => {
 
     // Check if the code is reused
     if (!record) {
-      throw new UnauthorizedError("Code doesn't exist");
+      throw new UnauthorizedError("Code already used ");
     }
     // Check if code is not altered
     if (record.code !== code) {
