@@ -2,7 +2,7 @@ import React from 'react'
 
 const page = () => {
   return (
-    <div>Payment failed</div>
+    <div className='text-red-800'>Payment failed</div>
   )
 }
 
