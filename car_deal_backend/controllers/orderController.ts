@@ -7,22 +7,22 @@ import dotenv from "dotenv";
 import { ApiResponse } from "../apiResponse/ApiResponse";
 import { IOrder } from "../types";
 import { ORDER_STATUS } from "../constants/orderStatus";
-import { join } from "path";
+import { FRONTEND_URL, STRIPE_SECRET, STRIPE_WEBHOOK_SECRET } from "../constants/envVariables";
 
 dotenv.config();
 
 // Check if stripe secret is there
-if (!process.env.STRIPE_SECRET) throw new Error("No stripe secret provided");
+if (!STRIPE_SECRET) throw new Error("No stripe secret provided");
 
-const stripeInstance = new Stripe(process.env.STRIPE_SECRET);
-const FRONTEND_URL = process.env.FRONTEND_URL
+const stripeInstance = new Stripe(STRIPE_SECRET);
 
 export const createCheckoutSession = async (req: Request, res: Response) => {
   try {
-    const products: IOrder[] = req.body;
-
+    const products: IOrder[]= req.body.products;
+    // console.log('products ', products);
+  
     if (!products) throw new BadRequestError("No products to order");
-
+  
     // Create line items for stripe checkout
     const lineItems = products.map((product) => ({
       price_data: {
@@ -31,12 +31,13 @@ export const createCheckoutSession = async (req: Request, res: Response) => {
           name: product.carName,
           images: [product.carImageCloudUrl],
         },
-        unit_amount: Math.round(product.totalPrice * 100),
+        unit_amount: Math.round(Number(product.totalPrice * 100)),
       },
-
+      
       quantity: product.carQuantity,
     }));
-
+    
+    // console.log('lineitems ', lineItems);
     // Create stripe checkout session
     const session = await stripeInstance.checkout.sessions.create({
       payment_method_types: ["card"],
@@ -45,16 +46,15 @@ export const createCheckoutSession = async (req: Request, res: Response) => {
       success_url: `${FRONTEND_URL}/success_url`,
       cancel_url: `${FRONTEND_URL}/cancel_url`,
       metadata: {
-        orderDetails: JSON.stringify(products),
+        orderDetails: JSON.stringify(products.map(product => product._id)),
       },
     });
+
 
     return res
       .status(201)
       .json(
-        new ApiResponse("Checkout session created successfully", {
-          sessionId: session.id,
-        })
+        new ApiResponse("Checkout session created successfully", session.id)
       );
   } catch (error) {
     if (error instanceof BadRequestError) {
@@ -69,7 +69,7 @@ export const createCheckoutSession = async (req: Request, res: Response) => {
 export const makePaymentAndOrder = async (req: Request, res: Response) => {
   try {
     const stripeSignature = req.headers['stripe-signature'];
-    const stripeWebhookSecret = process.env.STRIPE_WEBHOOK_SECRET
+    const stripeWebhookSecret = STRIPE_WEBHOOK_SECRET
 
     // Check if stripeSignature is there 
     if(!stripeSignature) throw new NotFoundError("Stripe signature is required")
