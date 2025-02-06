@@ -1,4 +1,3 @@
-import { CartItem } from '@/types/cart'
 import React from 'react'
 import LcdMonitor from "../../../../public/cart/lcd_monitor.png"
 import gamepad from "../../../../public/cart/gamepad.png"
@@ -9,7 +8,7 @@ import Visa from "../../../../public/checkout/svgs/visa.svg"
 import PayPessa from "../../../../public/checkout/svgs/pay_pessa.svg"
 import MasterCard from "../../../../public/checkout/svgs/mastercard.svg"
 
-const cartItems: CartItem[] = [
+const cartItems = [
     {
         image: LcdMonitor,
         cartItemName: "LCD Monitor",
