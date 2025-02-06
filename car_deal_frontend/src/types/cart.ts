@@ -1,6 +1,7 @@
 import { StaticImageData } from "next/image";
 
 export interface ICartItem {
+    _id: string
     carName: string;
     unitPrice: number;
     quantity: number;
@@ -12,7 +13,6 @@ export interface ICartItem {
 }
 
 export interface ISavedCartItem extends ICartItem {
-    _id: string;
     createdAt: string;
     updatedAt: string;
 }
