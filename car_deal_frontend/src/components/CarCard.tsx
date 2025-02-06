@@ -59,6 +59,7 @@ const CarCard = ({
   const handleAddToCart = ()=>{
    
     addToCartMutate({
+      _id:carId,
       carName,
       unitPrice,
       quantity: 1,
@@ -66,7 +67,7 @@ const CarCard = ({
       carImageCloudId,
       carImageCloudUrl,
       userEmail: user?.email || "",
-      userPhoneNumber: user?.email || "",
+      userPhoneNumber: user?.phoneNumber || "",
     })
 
   }
