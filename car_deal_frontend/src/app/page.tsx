@@ -38,9 +38,7 @@ const Home = ({ searchParams }: HomeProps) => {
       carId: string;
       likeStatus: boolean;
     }) => {
-      console.log("Sending request with:", { carId, likeStatus });
       const response = await updateCarIsLikedApi(carId, likeStatus);
-      console.log("Response:", response);
       return response;
     },
     onSuccess: (data) => {
@@ -343,7 +341,7 @@ const Home = ({ searchParams }: HomeProps) => {
                   //     <p className="text-red-500 font-semibold">${price}</p>
                   //   </div>
                   // </div>
-                  <div className="h-[270px] ">
+                  <div key={index} className="h-[270px] ">
                     <CarCard
                       key={index}
                       carId={_id}
