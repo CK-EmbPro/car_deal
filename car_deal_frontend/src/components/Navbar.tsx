@@ -11,21 +11,21 @@ import { CldImage } from "next-cloudinary";
 import { error } from "console";
 import { usePathname } from "next/navigation";
 const Navbar = () => {
-  const { user, isLoading,logout } = useAuth();  
-  const [isProfileClicked, setIsProfileClicked] = useState(false)
-  const pathname = usePathname()
+  const { user, isLoading, token, logout } = useAuth();
+  const [isProfileClicked, setIsProfileClicked] = useState(false);
+  const pathname = usePathname();
 
   useEffect(() => {
-    setIsProfileClicked(false)
-  }, [pathname])
-  
-  const handleProfilePhotoClick = ()=>{
-    setIsProfileClicked(prev => !prev)
-  }
+    setIsProfileClicked(false);
+  }, [pathname]);
 
-  const handleLogout =()=>{
-    logout()
-  }
+  const handleProfilePhotoClick = () => {
+    setIsProfileClicked((prev) => !prev);
+  };
+
+  const handleLogout = () => {
+    logout();
+  };
   return (
     <div className="border border-red-500 flex justify-evenly items-center py-4 text-[1.2em]">
       <Link href={"/"} className="text-[2em] font-bold text-red-500">
@@ -73,27 +73,41 @@ const Navbar = () => {
             <FontAwesomeIcon icon={faCartShopping} className="text-[25px]" />
           </Link>
 
-          {user && (
+          {user ? (
             <>
-              <div onClick={handleProfilePhotoClick} className="w-[50px] h-[50px] rounded-full relative cursor-pointer ">
+              <div
+                onClick={handleProfilePhotoClick}
+                className="w-[50px] h-[50px] rounded-full relative cursor-pointer "
+              >
                 <Image
                   className="w-full h-full object-cover rounded-full"
                   src="https://res.cloudinary.com/ddr0o2gz5/image/upload/CAR_DEAL_USERS_PROFILE_PHOTOS/visitingDay.jpg"
                   fill
                   alt="no_img"
-                
                 />
                 {/* <CldImage alt="no_img" src={user.profilePhotoCloudUrl} width={100} height={100} /> */}
               </div>
 
-              <div  className={` px-3 ${isProfileClicked ? "flex": "hidden"}  flex-col justify-evenly bg-slate-200 absolute top-[50px] right-[0px] w-[160px] max-w-[auto] h-[150px] `}>
-                  <p>Hey Mr.{user.firstName}</p>
-                  <button  onClick={handleLogout} className="bg-black text-start text-red-500">Logout</button>
-                  <Link href={"account"}>Your account</Link>
-                  <Link href={"cart"}>Your cart</Link>
+              <div
+                className={` px-3 ${
+                  isProfileClicked ? "flex" : "hidden"
+                }  flex-col justify-evenly bg-slate-200 absolute top-[50px] right-[0px] w-[160px] max-w-[auto] h-[150px] `}
+              >
+                <p>Hey Mr.{user.firstName}</p>
+                <button
+                  onClick={handleLogout}
+                  className="bg-black text-start text-red-500"
+                >
+                  Logout
+                </button>
+                <Link href={"account"}>Your account</Link>
+                <Link href={"cart"}>Your cart</Link>
               </div>
             </>
-          )}
+          ) : isLoading ? (
+            // 🔥 Skeleton Loader for Profile Picture
+            <div className="w-[50px] h-[50px] rounded-full bg-gray-300 animate-pulse"></div>
+          ) : null}
         </div>
       </div>
     </div>
