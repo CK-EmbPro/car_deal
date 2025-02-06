@@ -26,7 +26,6 @@ const VerifyCode = () => {
       console.log('entity after login ', data.entity);
       login(data.token, data.entity)
       setVerificationCode("");
-      login
       const params = new URLSearchParams(searchParams.toString());
       params.delete("email");
       router.replace("/");
