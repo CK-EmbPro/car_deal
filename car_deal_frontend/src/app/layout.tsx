@@ -7,7 +7,8 @@ import "@/utils/fontawesome";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import ReactQueryProvider from "@/providers/query-client/ReactQueryProvider";
-import { AuthProvider } from "@/context/userContext";
+import { AppProvider } from "@/context/userContext";
+import App from "next/app";
 
 config.autoAddCss = false;
 
@@ -31,11 +32,11 @@ export default function RootLayout({
     <html lang="en">
       <body className={`${open_sans.className} antialiased`}>
         <ReactQueryProvider>
-          <AuthProvider>
+          <AppProvider>
             <Navbar />
             {children}
             <Footer />
-          </AuthProvider>
+          </AppProvider>
         </ReactQueryProvider>
       </body>
     </html>
