@@ -1,6 +1,7 @@
 import { BACKEND_URL } from "@/constants/variables";
 import { ILoginData } from "@/types/user";
 import axios, { AxiosError } from "axios";
+import { NextRequest, NextResponse } from "next/server";
 
 const apiClient = axios.create({
   baseURL: BACKEND_URL,
@@ -22,6 +23,9 @@ export const loginApi = async (loginData: ILoginData) => {
     // throw error;
   }
 };
+
+
+
 
 export const registerUserApi = async (registerFormData: FormData) => {
   try {
@@ -46,10 +50,13 @@ export const verifyCodeApi = async (email: string, code: string) => {
     const response = await apiClient.post("/auth/verify-code", {
       email,
       code: Number(code)
+    }, {
+      withCredentials : true
     });
     return response.data;
   } catch (error) {
     if (error instanceof AxiosError) {
+      console.log('error ', error);
       throw new Error(error.response?.data.message || "An error occurred");
     }
 
@@ -69,3 +76,34 @@ export const resendVerificationCodeApi = async(email: string)=>{
     throw error
   }
 }
+
+
+export const logoutUser = async():Promise<string> =>{
+  try {
+    const response = await apiClient.delete('/auth/logout',{withCredentials: true} )
+    console.log('logout result res ', response);
+    return response.data.message
+  } catch (error) {
+    if(error instanceof AxiosError){
+      return "error "+error.response?.data.message
+      // throw new Error(error.response?.data.message)
+      
+    }
+
+    throw error;
+  }
+}
+
+export const getProfile = async () => {
+  try {
+    const response = await apiClient.get("/auth/me");
+    console.log('My profile result  ', response);
+    return response.data;
+  } catch (error) {
+    if (error instanceof AxiosError) {
+      return error.response?.data.message
+      // throw new Error(error.response?.data.message || "An error occurred");
+    }
+    throw error;
+  }
+};
