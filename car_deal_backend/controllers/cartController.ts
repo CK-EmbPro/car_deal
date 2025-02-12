@@ -17,6 +17,8 @@ export const addCartItem = async (req: Request, res: Response) => {
       userPhoneNumber,
     } = req.body;
 
+    console.log('cart req body', req.body);
+
     let savedCart = new CartModel({
       carName,
       unitPrice,
@@ -82,12 +84,14 @@ export const updateWholeCart = async (req: Request, res: Response) => {
     }
 
     for (const item of updatedCart) {
+      console.log('item ',item);
       if (!item._id) {
         throw new BadRequestError("Item must have id")
       }
     }
 
     const bulkOperations = updatedCart.map((item) => ({
+      
       updateOne: {
         filter: { _id: item._id },
         update: {
