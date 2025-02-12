@@ -1,94 +1,185 @@
 "use client";
 
-import { TOKEN_COOKIE, USER_COOKIE } from "@/constants/common";
+import { getProfile, logoutUser } from "@/api/auth/authApis";
+import {
+  addCartItemApi,
+  deleteAllCartItemsApi,
+  deleteCartItemApi,
+  getCartItemsApi,
+  updateWholeCartApi,
+} from "@/api/cart/cartApis";
+import { USER_STORAGE_KEY } from "@/constants/common";
+import { ICartItem, ISavedCartItem, RawCartItemList } from "@/types/cart";
 import { ISavedUser } from "@/types/user";
-import { useQueryClient } from "@tanstack/react-query";
-import { createContext, useCallback, useContext, useEffect, useState } from "react";
-import Cookies from 'js-cookie';
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useRouter } from "next/navigation";
+import React, { createContext, useContext, useEffect, useState } from "react";
 
-interface AuthContextType {
+interface AppContextType {
   user: ISavedUser | null;
-  token: string | null;
-  login: (token: string, userData: ISavedUser) => void;
+  cartItems: ISavedCartItem[] | undefined;
+  isCartLoading: boolean;
+  login: (userData: ISavedUser) => void;
   logout: () => void;
-  getAuthHeader: () => { Authorization: string } | Record<string, never>;
+  addToCart: (cartItem: ICartItem) => void;
+  removeCartItem: (cartId: string) => void;
+  clearWholeCart: () => void;
+  updateWholeCart: (cart: ICartItem[]) => void;
   isLoading: boolean;
 }
 
-const AuthContext = createContext<AuthContextType | undefined>(undefined);
+const AppContext = createContext<AppContextType | undefined>(undefined);
 
-export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
-  const queryClient = useQueryClient();
-  const [token, setToken] = useState<string | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
+export const AppProvider: React.FC<{ children: React.ReactNode }> = ({
+  children,
+}) => {
   const [user, setUser] = useState<ISavedUser | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const queryClient = useQueryClient();
+  const router = useRouter();
+
+  // Cart Query
+  const {// queryClient.setQueryData<RawCartItemList>(["cartItems"], (old) => ({
+    //   ...old!,
+    //   entity: data.entity,
+    // }));
+    data: cartItems,
+    isLoading: isCartLoading,
+  } = useQuery<RawCartItemList, Error, ISavedCartItem[]>({
+    queryKey: ["cartItems"],
+    queryFn: getCartItemsApi,
+    select: (data) => data.entity,
+    enabled: !!user, // Only fetch if user is logged in
+  });
+
+  // Update whole cart mutation
+  const { mutate: updateCart } = useMutation({
+    mutationFn: updateWholeCartApi,
+    onSuccess: (data) => {
+      console.log('updated data ', data);
+      alert(data.message);
+    },
+    onError: (error) => {
+      alert(error.message);
+    },
+  });
+
+  // Add to cart mutation
+  const { mutate: addToCartMutate } = useMutation({
+    mutationFn: addCartItemApi,
+    onSuccess: (data) => {
+      queryClient.setQueryData<RawCartItemList>(["cartItems"], (old) => ({
+        ...old!,
+        entity: [...(old?.entity || []), data.entity],
+      }));
+      alert(data.message);
+      router.push("/cart");
+    },
+    onError: (error) => {
+      alert("error " + error.message);
+      console.error(error.message);
+    },
+  });
+
+  // Delete cart item mutation
+  const { mutate: deleteCartItem } = useMutation({
+    mutationFn: deleteCartItemApi,
+    onSuccess: (data, id) => {
+      queryClient.setQueryData<RawCartItemList>(["cartItems"], (old) => ({
+        ...old!,
+        entity: old?.entity.filter((item) => item._id !== id) || [],
+      }));
+      alert(data.message);
+    },
+    onError: (error) => {
+      alert(error.message);
+    },
+  });
+
+  // Clear cart mutation
+  const { mutate: clearCart } = useMutation({
+    mutationFn: deleteAllCartItemsApi,
+    onSuccess: (data) => {
+      queryClient.setQueryData<RawCartItemList>(["cartItems"], (old) => ({
+        ...old!,
+        entity: [],
+      }));
+      alert(data.message);
+    },
+    onError: (error) => {
+      alert(error.message);
+    },
+  });
 
   useEffect(() => {
-    if (typeof window !== "undefined") {
-      const savedUser = Cookies.get(USER_COOKIE);
-      const savedToken = Cookies.get(TOKEN_COOKIE);
-      if (savedUser) setUser(JSON.parse(savedUser));
-      if (savedToken) setToken(savedToken);
-      setIsLoading(false);
-    }
+    const fetchUser = async () => {
+      try {
+        const storedUser = sessionStorage.getItem(USER_STORAGE_KEY);
+        if (storedUser) setUser(JSON.parse(storedUser));
+
+        const result = await getProfile();
+        if (typeof result !== "string") {
+          setUser(result);
+          sessionStorage.setItem(USER_STORAGE_KEY, JSON.stringify(result));
+        }
+      } catch (error) {
+        console.error("Failed to fetch user:", error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchUser();
   }, []);
 
-  useEffect(() => {
-    if (user) {
-      Cookies.set(USER_COOKIE, JSON.stringify(user));
-    } else {
-      Cookies.remove(USER_COOKIE);
+  const login = (userData: ISavedUser) => {
+    setUser(userData);
+    sessionStorage.setItem(USER_STORAGE_KEY, JSON.stringify(userData));
+    // Refetch cart items when user logs in
+    queryClient.invalidateQueries({ queryKey: ["cartItems"] });
+  };
+
+  const logout = async () => {
+    try {
+      const result = await logoutUser();
+      if (result.startsWith("error")) {
+        alert(result.substring(6));
+        return;
+      }
+      alert(result);
+      setUser(null);
+      sessionStorage.removeItem(USER_STORAGE_KEY);
+      // Clear cart data from cache on logout
+      queryClient.setQueryData(["cartItems"], null);
+    } catch (error) {
+      console.error("Logout failed:", error);
     }
-
-    if (token) {
-      Cookies.set(TOKEN_COOKIE, token);
-    } else {
-      Cookies.remove(TOKEN_COOKIE);
-    }
-  }, [user, token]);
-
-  const login = useCallback(
-    (newToken: string, userData: ISavedUser) => {
-      setToken(newToken);
-      setUser(userData);
-      queryClient.setQueryData(["user"], userData);
-    },
-    [queryClient]
-  );
-
-  const logout = useCallback(() => {
-    setToken(null);
-    setUser(null);
-    Cookies.remove(USER_COOKIE);
-    Cookies.remove(TOKEN_COOKIE);
-    queryClient.setQueryData(["user"], null);
-  }, [queryClient]);
-
-  const getAuthHeader = useCallback((): { Authorization: string } | Record<string, never> => {
-    return token ? { Authorization: `Bearer ${token}` } : {};
-  }, [token]);
+  };
 
   return (
-    <AuthContext.Provider
+    <AppContext.Provider
       value={{
         user,
-        token,
+        cartItems,
+        isCartLoading,
         login,
-        isLoading,
         logout,
-        getAuthHeader
+        addToCart: addToCartMutate,
+        removeCartItem: deleteCartItem,
+        clearWholeCart: clearCart,
+        updateWholeCart: updateCart,
+        isLoading,
       }}
     >
       {children}
-    </AuthContext.Provider>
+    </AppContext.Provider>
   );
 };
 
 export function useAuth() {
-  const context = useContext(AuthContext);
+  const context = useContext(AppContext);
   if (context === undefined) {
     throw new Error("useAuth must be used within an AuthProvider");
   }
-
-  return context
+  return context;
 }
