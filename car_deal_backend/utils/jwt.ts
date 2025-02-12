@@ -6,12 +6,12 @@ import {
   NotFoundError,
   UnauthorizedError,
 } from "../exceptions/errors";
+import { JWT_SECRET, TOKEN_EXPIREATION_TIME } from "../constants/envVariables";
 dotenv.config();
 
-const jwtSecretKey = process.env.JWT_SECRET;
 
 export const generateToken = (user: IUser) => {
-  if (!jwtSecretKey) {
+  if (!JWT_SECRET) {
     throw new NotFoundError("Jwt secret key to sign token, not found");
   }
 
@@ -20,7 +20,7 @@ export const generateToken = (user: IUser) => {
   }
 
   try {
-    const token = jwt.sign({ user }, jwtSecretKey, { expiresIn: 60 * 60 });
+    const token = jwt.sign({ user }, JWT_SECRET, { expiresIn: TOKEN_EXPIREATION_TIME });
 
     return token;
   } catch (error) {
@@ -30,13 +30,13 @@ export const generateToken = (user: IUser) => {
 
 export const verifyToken = (token: string) => {
   try {
-    if (!jwtSecretKey) {
+    if (!JWT_SECRET) {
       throw new NotFoundError("Jwt secret key not provided");
     } else if (!token) {
       throw new UnauthorizedError("Auth Token required");
     }
 
-    const decodedUser = jwt.verify(token, jwtSecretKey) as JwtPayload;
+    const decodedUser = jwt.verify(token, JWT_SECRET) as JwtPayload;
     return {
       decodedUser,
     };
