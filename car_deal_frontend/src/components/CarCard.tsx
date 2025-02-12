@@ -1,7 +1,6 @@
 "use client"
 
 import Image from "next/image";
-import Link from "next/link";
 import React from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faHeart as faHeartSolid } from "@fortawesome/free-solid-svg-icons";
@@ -34,31 +33,17 @@ const CarCard = ({
   unitPrice,
 }: CarCardProps) => {
 
-  const {user, getAuthHeader} = useAuth()
-  const authHeader = getAuthHeader()
+  const {user, addToCart} = useAuth()
   const router = useRouter()
 
-  const {mutate:addToCartMutate} = useMutation({
-  mutationFn: async(cartItem:ICartItem) => await addCartItemApi(cartItem, authHeader),
-  onSuccess: (data) => {
-    alert(data.message)
-    router.push('/cart')
 
-  },
-  onError: (error)=>{
-    if(!user?._id && !user?.email){
-      alert("Please login to continue")
-      return
-    }else{
-      alert("error "+error.message)
-    }
-    console.log(error.message);
-  }
-  })
 
   const handleAddToCart = ()=>{
-   
-    addToCartMutate({
+    if(!user) {
+      alert("Please login to add to cart")
+      return
+    }
+    addToCart({
       _id:carId,
       carName,
       unitPrice,
@@ -102,7 +87,7 @@ const CarCard = ({
         </div>
         <button
         onClick={handleAddToCart}
-          className=" transform translate-y-full opacity-0 duration-500 delay-100 transition-all group-hover:opacity-100 group-hover:translate-y-0 absolute bottom-0 w-full bg-black text-white font-semibold py-2 text-center"
+          className="transform translate-y-full opacity-0 duration-500 delay-100 transition-all group-hover:opacity-100 group-hover:translate-y-0 absolute bottom-0 w-full bg-black text-white font-semibold py-2 text-center"
         >
           Add to Cart
         </button>
