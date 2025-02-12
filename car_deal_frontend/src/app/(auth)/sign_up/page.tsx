@@ -24,7 +24,7 @@ const SignUp = () => {
     mutationFn: async (userData: FormData) => await registerUserApi(userData),
     onSuccess: (data) => {
       alert(data.message);
-      login(data.token, data.entity)
+      login(data.entity)  
       setRegisteringData({
         email: "",
         firstName: "",
