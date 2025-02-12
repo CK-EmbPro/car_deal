@@ -7,6 +7,7 @@ import jwt from 'jsonwebtoken'
 import mongoose from 'mongoose';
 import { ADMIN_EMAIL } from '../constants/envVariables';
 import { ApiResponse } from '../apiResponse/ApiResponse';
+import { AUTH_COOKIE_NAME } from '../constants/common';
 
 dotenv.config()
 
@@ -18,10 +19,10 @@ export const adminMiddleware = async (
     next: NextFunction
 ) => {
     try {
-        const token = req.header("Authorization")?.substring(7);
-        if (!token) {
-            throw new UnauthorizedError("Auth is required")
+        const token = req.cookies[AUTH_COOKIE_NAME];
 
+        if (!token) {
+            throw new UnauthorizedError("Please login first")
         }
 
         const decodedToken = verifyToken(token);
@@ -36,30 +37,38 @@ export const adminMiddleware = async (
             throw new ForbiddenError("Operation not allowed")
         }
 
+        const { password, ...rest } = currentUser.toObject()
+        req.user = rest
+
         next();
     } catch (error) {
         if (error instanceof BadRequestError) {
             return res.status(400).json(new ApiResponse(error.message, null))
-        } else if (error instanceof ForbiddenError) {
+        } else if (error instanceof UnauthorizedError) {
+            return res.status(401).json(new ApiResponse(error.message, null))
+        }
+        else if (error instanceof ForbiddenError) {
             return res.status(403).json(new ApiResponse(error.message, null))
         } else if (error instanceof jwt.TokenExpiredError) {
-            return res.status(400).json(new ApiResponse(error.message, null));
+            res.clearCookie(AUTH_COOKIE_NAME)
+            req.user= null
+            return res.status(400).json(new ApiResponse(`${error.message}, Please login again`, null));
         } else if (error instanceof NotFoundError) {
             return res.status(404).json(new ApiResponse(error.message, null));
-        } else if (error instanceof UnauthorizedError) {
-            return res.status(401).json(new ApiResponse(error.message, null));
         } else if (error instanceof jwt.JsonWebTokenError) {
-            return res.status(400).json(new ApiResponse(error.message, null));
+            res.clearCookie(AUTH_COOKIE_NAME)
+            req.user= null
+        return res.status(400).json(new ApiResponse(error.message, null));
 
-        } else if (error instanceof mongoose.Error.ValidationError) {
-            const validationErrors = Object.values(error.errors).map(
-                (err) => err?.message
-            );
-            return res.status(400).json(new ApiResponse(validationErrors[0], null));
-        }
-
-        else if (error instanceof Error) {
-            return res.status(400).json(new ApiResponse(error.message, null));
-        }
+    } else if (error instanceof mongoose.Error.ValidationError) {
+        const validationErrors = Object.values(error.errors).map(
+            (err) => err?.message
+        );
+        return res.status(400).json(new ApiResponse(validationErrors[0], null));
     }
+
+    else if (error instanceof Error) {
+        return res.status(400).json(new ApiResponse(error.message, null));
+    }
+}
 };
