@@ -1,4 +1,4 @@
-import { Request, Response } from "express";
+import { Request, response, Response } from "express";
 import { UserModel } from "../models/User";
 import {
   BadRequestError,
@@ -19,6 +19,7 @@ import { CLOUD_FOLDERS } from "../constants/cloudFolderNames";
 import { ADMIN_EMAIL } from "../constants/envVariables";
 import { VerificationCodeModel } from "../models/VerificationCode";
 import { VERIFICATION_CODE_STATUS } from "../constants/verifyCodeStatus";
+import { AUTH_COOKIE_NAME } from "../constants/common";
 
 
 
@@ -58,12 +59,14 @@ export const login = async (req: Request, res: Response) => {
       verificationCode,
     });
 
+    const {password:pword, ...rest} = userToLogin
+
     return res
       .status(200)
       .json(
         new ApiResponse(
           "Please check your email for verification code",
-          userToLogin
+          rest
         )
       );
   } catch (error) {
@@ -82,6 +85,7 @@ export const login = async (req: Request, res: Response) => {
     }
   }
 };
+
 
 export const verifyCode = async (req: Request, res: Response) => {
   try {
@@ -104,8 +108,9 @@ export const verifyCode = async (req: Request, res: Response) => {
     if (!record) {
       throw new UnauthorizedError("Code already used ");
     }
+    
     // Check if code is not altered
-    if (record.code !== code) {
+    if (record.code !== +code) {
       throw new UnauthorizedError("Invalid code");
     }
 
@@ -125,9 +130,20 @@ export const verifyCode = async (req: Request, res: Response) => {
     const token = generateToken(userToLogin);
 
     // Api Response
+    res.cookie(AUTH_COOKIE_NAME, token, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "strict",
+      path: "/"
+    })
+
+    console.log('response ', res);
+
+    const {password:pword, ...rest} = userToLogin.toObject()
+
     return res
       .status(200)
-      .json(new ApiResponse<IUser>("Welcome back ", userToLogin, token));
+      .json(new ApiResponse("Welcome back ", rest));
   } catch (error) {
     if (error instanceof NotFoundError) {
       return res.status(404).json(new ApiResponse(error.message, null));
@@ -200,9 +216,11 @@ export const register = async (req: MulterRequest, res: Response) => {
 
     // Check if user exists already
     if (userExists) {
+      const {password:pword, ...rest} = userExists.toObject()
+
       return res
         .status(409)
-        .json(new ApiResponse<IUser>("User already exists", userExists));
+        .json(new ApiResponse("User already exists", rest));
     }
 
     // Upload to cloudinary profilephoto
@@ -223,14 +241,21 @@ export const register = async (req: MulterRequest, res: Response) => {
     const savedUser = await userToSave.save();
     const token = generateToken(savedUser);
 
+    res.cookie(AUTH_COOKIE_NAME, token, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV == "production",
+      sameSite: "strict"
+    })
+
+    const {password:pword, ...rest} = savedUser.toObject()
+
+
     return res
       .status(201)
       .json(
-        new ApiResponse<IUser>(
+        new ApiResponse(
           "You've registered successfully",
-          savedUser,
-          token
-        )
+          rest)
       );
   } catch (error) {
     if (error instanceof NotFoundError) {
@@ -250,9 +275,14 @@ export const getSingleUser = async (req: Request, res: Response) => {
   try {
     const { userId } = req.params;
     const user = await UserModel.findById(userId);
+
+    if(!user) throw new NotFoundError("User not found");
+    const {password:pword, ...rest} = user.toObject()
+
+
     return res
       .status(200)
-      .json(new ApiResponse("User retrieved successfully", user));
+      .json(new ApiResponse("User retrieved successfully", rest));
   } catch (error) {
     if (error instanceof mongoose.Error.ValidationError) {
       const validationErrors = Object.values(error.errors).map(
@@ -267,10 +297,16 @@ export const getSingleUser = async (req: Request, res: Response) => {
 
 export const getUsers = async (req: Request, res: Response) => {
   try {
-    const users = await UserModel.find();
+    const users = await UserModel.find().lean() //To  convert mongoose objects to plain js objects;
+    const withoutPwords =  users.map((user)=>{
+      const {password, __v, ...withoutPword} = user
+      return withoutPword
+    })
+
+
     return res
       .status(200)
-      .json(new ApiResponse("Users retrieved successfully", users));
+      .json(new ApiResponse("Users retrieved successfully", withoutPwords));
   } catch (error) {
     if (error instanceof mongoose.Error.ValidationError) {
       const validationErrors = Object.values(error.errors).map(
@@ -348,3 +384,40 @@ export const deleteAllUsers = async (req: Request, res: Response) => {
     }
   }
 };
+
+export const getProfile = (req: Request, res: Response) => {
+  try {
+    if (req.user === null) {
+      throw new BadRequestError("Please login first")
+    }
+    return res.status(200).json(new ApiResponse("My profile", req.user))
+  } catch (error) {
+    if (error instanceof BadRequestError) {
+      res.clearCookie(AUTH_COOKIE_NAME)
+      res.status(400).send(new ApiResponse(error.message, null))
+    } else if (error instanceof Error) {
+      return res.status(400).json(new ApiResponse(error.message, null));
+    }
+  }
+}
+
+export const logout = (req: Request, res: Response) => {
+  try {
+    const token = req.cookies[AUTH_COOKIE_NAME]
+    
+    if (!token && req.user===null) {
+      throw new BadRequestError("You are not logged in")
+    }
+
+    res.clearCookie(AUTH_COOKIE_NAME)
+    req.user= null
+
+    return res.status(200).json(new ApiResponse("Successfully logged out", null))
+  } catch (error) {
+    if(error instanceof BadRequestError){
+      return res.status(400).json(new ApiResponse(error.message, null))
+    }else if(error instanceof Error){
+      return res.status(400).json(new ApiResponse(error.message, null))
+    }
+  }
+}
