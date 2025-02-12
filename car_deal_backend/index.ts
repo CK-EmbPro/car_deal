@@ -8,7 +8,7 @@ import { orderRouter } from './routes/orderRoutes'
 import { cartRouter } from './routes/cartRoutes'
 import { carRouter } from './routes/carRoutes'
 import { subscriptionRouter } from './routes/subscriptionRoutes'
-import { authMiddleware } from './middlewares/authMiddleware'
+import cookieParser from 'cookie-parser'
 
 // Load environment variables
 dotenv.config()
@@ -19,16 +19,20 @@ const app:Express = express()
 // Get the server port
 const port = process.env.PORT
 
-// Enable cross origin requests
-app.use(cors({
-    origin: "*"
-}))
-
 // Establish connection to mongoatlas]
 connectToDb()
 
+// Enable cross origin requests
+app.use(cors({
+    origin: "http://localhost:3000",
+    credentials: true //Allows cookies to be senty
+}))
+
 // Parse json request data
 app.use(express.json())
+
+// Parse the cookies in res and req
+app.use(cookieParser())
 
 // endpoints
 app.get('/',(req: Request, res: Response)=>{
