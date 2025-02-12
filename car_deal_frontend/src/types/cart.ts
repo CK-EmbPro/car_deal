@@ -1,5 +1,10 @@
 import { StaticImageData } from "next/image";
 
+export interface RawCartItemList {
+    entity: ISavedCartItem[];
+    message: string;
+  }
+
 export interface ICartItem {
     _id: string
     carName: string;
