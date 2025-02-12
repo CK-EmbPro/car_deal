@@ -1,7 +1,8 @@
 import { Router } from "express";
-import { deleteAllUsers, deleteUser, getSingleUser, getUsers, login, register, resendEmailVerification, verifyCode } from "../controllers/userController";
+import { deleteAllUsers, deleteUser, getSingleUser, getUsers, login, getProfile, register, resendEmailVerification, verifyCode, logout } from "../controllers/userController";
 import { upload } from "../config/multerConfig";
 import { adminMiddleware } from "../middlewares/adminMiddleware";
+import { authMiddleware } from "../middlewares/authMiddleware";
 
 export const authRouter = Router()
 
@@ -46,14 +47,20 @@ authRouter.post('/verify-code', verifyCode)
 authRouter.post('/resend-email', resendEmailVerification)
 
 // @ts-ignore
-authRouter.get('/user', getUsers)
+authRouter.get('/me',authMiddleware, getProfile)
 
 // @ts-ignore
-authRouter.get('/user/:userId', getSingleUser)
+authRouter.delete('/logout', authMiddleware, logout)
+
+// @ts-ignore
+authRouter.get('/user',authMiddleware, getUsers)
+
+// @ts-ignore
+authRouter.get('/user/:userId',authMiddleware, getSingleUser)
 
 
 // @ts-ignore
-authRouter.delete('/user/:userId', deleteUser)
+authRouter.delete('/user/:userId',authMiddleware, deleteUser)
 
 // @ts-ignore
-authRouter.delete('/user', deleteAllUsers)
+authRouter.delete('/user',authMiddleware, deleteAllUsers)
