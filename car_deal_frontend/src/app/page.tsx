@@ -14,8 +14,6 @@ import { getCarsApi, updateCarIsLikedApi } from "@/api/car/carApis";
 import { carCategories } from "@/constants/carCategories";
 import CarCard from "@/components/CarCard";
 
-
-
 type HomeProps = {
   searchParams: { [key: string]: string | undefined };
 };
