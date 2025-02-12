@@ -11,13 +11,9 @@ const apiClient = axios.create({
     }
 })
 
-export const addCartItemApi = async(cartItem: ICartItem, authHeader:Record<string, string>)=>{
+export const addCartItemApi = async(cartItem: ICartItem)=>{
     try {
-        const response = await apiClient.post('/cart', cartItem, {
-            headers: {
-                ...authHeader
-            }
-        })
+        const response = await apiClient.post('/cart', cartItem)
         return response.data
     } catch (error) {
         if(error instanceof AxiosError) throw new Error(error.response?.data.message
@@ -26,14 +22,10 @@ export const addCartItemApi = async(cartItem: ICartItem, authHeader:Record<strin
     }
 }
 
-export const getCartItemsApi = async(authHeader: Record<string, string>)=>{
+export const getCartItemsApi = async()=>{
     try {
 
-        const response = await apiClient.get('/cart', {
-            headers: {
-                ...authHeader
-            }
-        })
+        const response = await apiClient.get('/cart')
         return response.data
     } catch (error) {
         if(error instanceof AxiosError) throw new Error(error.response?.data.message);
@@ -41,15 +33,10 @@ export const getCartItemsApi = async(authHeader: Record<string, string>)=>{
     }
 }
 
-export const updateWholeCartApi = async(authHeader: Record<string, string>, updatedCart: ICartItem[])=>{
+export const updateWholeCartApi = async(updatedCart: ICartItem[])=>{
     try {
 
-        const response = await apiClient.put('/cart',updatedCart, {
-            headers: {
-                ...authHeader
-            },
-            
-        })
+        const response = await apiClient.put('/cart',updatedCart)
         return response.data
     } catch (error) {
         if(error instanceof AxiosError) throw new Error(error.response?.data.message);
@@ -58,14 +45,10 @@ export const updateWholeCartApi = async(authHeader: Record<string, string>, upda
 }
 
 
-export const deleteCartItemApi = async(id:string,authHeader: Record<string, string>)=>{
+export const deleteCartItemApi = async(id:string)=>{
     try {
 
-        const response = await apiClient.delete(`/cart/${id}`, {
-            headers: {
-                ...authHeader
-            }
-        })
+        const response = await apiClient.delete(`/cart/${id}`)
         return response.data
     } catch (error) {
         if(error instanceof AxiosError) throw new Error(error.response?.data.message);
@@ -73,14 +56,10 @@ export const deleteCartItemApi = async(id:string,authHeader: Record<string, stri
     }
 }
 
-export const deleteAllCartItemsApi = async(authHeader: Record<string, string>)=>{
+export const deleteAllCartItemsApi = async()=>{
     try {
 
-        const response = await apiClient.delete(`/cart`, {
-            headers: {
-                ...authHeader
-            }
-        })
+        const response = await apiClient.delete(`/cart`)
         return response.data
     } catch (error) {
         if(error instanceof AxiosError) throw new Error(error.response?.data.message);
